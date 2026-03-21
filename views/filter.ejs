@@ -1,0 +1,93 @@
+<% layout('boilerplate') -%>
+
+    <body>
+        <!-- Category Filters -->
+        <div class="filters">
+            <div class="filter <% if(catg==='Trending') { %>active<% } %>">
+                <a href="/listing/show/Trending"><i class="fa-solid fa-fire"></i>
+                    <p class="icon-text">Trending</p>
+                </a>
+            </div>
+            <div class="filter <% if(catg==='Rooms') { %>active<% } %>">
+                <a href="/listing/show/Rooms"><i class="fa-solid fa-bed"></i>
+                    <p class="icon-text">Rooms</p>
+                </a>
+            </div>
+            <div class="filter <% if(catg==='Iconic Cities') { %>active<% } %>">
+                <a href="/listing/show/Iconic Cities"><i class="fa-solid fa-mountain-city"></i>
+                    <p class="icon-text">Iconic Cities</p>
+                </a>
+            </div>
+            <div class="filter <% if(catg==='Mountains') { %>active<% } %>">
+                <a href="/listing/show/Mountains"><i class="fa-solid fa-mountain"></i>
+                    <p class="icon-text">Mountains</p>
+                </a>
+            </div>
+            <div class="filter <% if(catg==='Castles') { %>active<% } %>">
+                <a href="/listing/show/Castles"><i class="fa-brands fa-fort-awesome"></i>
+                    <p class="icon-text">Castles</p>
+                </a>
+            </div>
+            <div class="filter <% if(catg==='Beaches') { %>active<% } %>">
+                <a href="/listing/show/Beaches"><i class="fa-solid fa-person-swimming"></i>
+                    <p class="icon-text">Beaches</p>
+                </a>
+            </div>
+            <div class="filter <% if(catg==='Camping') { %>active<% } %>">
+                <a href="/listing/show/Camping"><i class="fa-solid fa-campground"></i>
+                    <p class="icon-text">Camping</p>
+                </a>
+            </div>
+            <div class="filter <% if(catg==='Farms') { %>active<% } %>">
+                <a href="/listing/show/Farms"><i class="fa-solid fa-tractor"></i>
+                    <p class="icon-text">Farms</p>
+                </a>
+            </div>
+            <div class="filter <% if(catg==='Arctic') { %>active<% } %>">
+                <a href="/listing/show/Arctic"><i class="fa-regular fa-snowflake"></i>
+                    <p class="icon-text">Arctic</p>
+                </a>
+            </div>
+            <a href="/listing" class="tax-box ms-auto" style="text-decoration:none; color:var(--text);">
+                <i class="fa-solid fa-arrow-left" style="color:var(--brand);"></i> All listings
+            </a>
+        </div>
+
+        <!-- Filtered Cards -->
+        <% let filtered=listdata.filter(x=> x.category === catg);
+            %>
+            <% if(filtered.length===0) { %>
+                <div style="text-align:center; padding:5rem 2rem; color:var(--muted);">
+                    <i class="fa-solid fa-face-sad-tear" style="font-size:3rem; color:#d1d5db; margin-bottom:1rem;"></i>
+                    <p style="font-size:1.1rem; font-weight:600;">No listings found in "<%= catg %>"</p>
+                    <a href="/listing" class="btn-wl"
+                        style="text-decoration:none; margin-top:0.5rem; display:inline-flex;">View all listings</a>
+                </div>
+                <% } else { %>
+                    <div class="cards">
+                        <% for (let x of filtered) { %>
+                            <a href="/moreabout/<%=x.id%>" class="cardLink">
+                                <div class="card">
+                                    <div style="overflow:hidden;">
+                                        <img src="<%=x.image.url%>" class="card-img-top" alt="<%=x.title%>">
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="card-title-text">
+                                            <%=x.title%>
+                                        </div>
+                                        <div class="card-location">
+                                            <i class="fa-solid fa-location-dot me-1"
+                                                style="color:var(--brand);font-size:0.75rem;"></i>
+                                            <%=x.location%>, <%=x.country%>
+                                        </div>
+                                        <div class="card-price">
+                                            &#8377; <%=x.price.toLocaleString("en-IN")%>
+                                                <span>/night</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                            <% } %>
+                    </div>
+                    <% } %>
+    </body>

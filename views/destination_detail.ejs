@@ -1,0 +1,198 @@
+<% layout('boilerplate') -%>
+
+    <body>
+        <!-- ══ Hero Banner ══ -->
+        <div class="dd-hero">
+            <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1600&q=80" alt="Destination background"
+                style="width:100%; height:360px; object-fit:cover; display:block;">
+            <div class="dd-hero-overlay"></div>
+
+            <div class="dd-hero-content">
+                <!-- Breadcrumb -->
+                <a href="/destinations" class="dd-breadcrumb">
+                    <i class="fa-solid fa-arrow-left"></i> All Destinations
+                </a>
+
+                <h1 class="dd-hero-title">
+                    <%= destination.name %>
+                </h1>
+                <p class="dd-hero-country">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <%= destination.country %>
+                </p>
+
+                <div class="dd-hero-pills">
+                    <span class="dd-pill">
+                        <i class="fa-solid fa-bed"></i>
+                        <%= stays.length %> Stay<%= stays.length !==1 ? 's' : '' %>
+                    </span>
+                    <span class="dd-pill">
+                        <i class="fa-solid fa-person-hiking"></i>
+                        <%= experiences.length %> Experience<%= experiences.length !==1 ? 's' : '' %>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dd-body">
+
+            <!-- About destination -->
+            <% if(destination.description) { %>
+                <div class="detail-card" style="margin-bottom:0;">
+                    <div class="section-title">
+                        <i class="fa-solid fa-circle-info" style="color:var(--brand);"></i>
+                        About <%= destination.name %>
+                    </div>
+                    <p style="color:var(--text); font-size:0.95rem; line-height:1.75; margin:0;">
+                        <%= destination.description %>
+                    </p>
+                </div>
+                <% } %>
+
+                    <!-- ══ Tab switcher ══ -->
+                    <div class="dd-tabs">
+                        <button class="dd-tab active" id="tab-stays" onclick="switchTab('stays')">
+                            <i class="fa-solid fa-bed"></i> Stays
+                            <span class="dd-tab-count">
+                                <%= stays.length %>
+                            </span>
+                        </button>
+                        <button class="dd-tab" id="tab-exp" onclick="switchTab('exp')">
+                            <i class="fa-solid fa-person-hiking"></i> Experiences
+                            <span class="dd-tab-count">
+                                <%= experiences.length %>
+                            </span>
+                        </button>
+                    </div>
+
+                    <!-- ══ STAYS PANEL ══ -->
+                    <div id="panel-stays">
+                        <% if(stays.length===0) { %>
+                            <div class="dd-empty">
+                                <i class="fa-solid fa-house"></i>
+                                <p>No stays available in <%= destination.name %> yet.</p>
+                            </div>
+                            <% } else { %>
+                                <div class="cards" style="padding:0;">
+                                    <% for(let x of stays) { %>
+                                        <a href="/moreabout/<%= x.id %>" class="cardLink">
+                                            <div class="card">
+                                                <div style="overflow:hidden;">
+                                                    <img src="<%= optimizeImg(x.image.url, 800, 450) %>"
+                                                        class="card-img-top" alt="<%= x.title %>">
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="card-title-text">
+                                                        <%= x.title %>
+                                                    </div>
+                                                    <div class="card-location">
+                                                        <i class="fa-solid fa-location-dot me-1"
+                                                            style="color:var(--brand);font-size:0.75rem;"></i>
+                                                        <%= x.location %>, <%= x.country %>
+                                                    </div>
+                                                    <div class="card-price">
+                                                        &#8377; <%= x.price.toLocaleString("en-IN") %>
+                                                            <span>/night</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                        <% } %>
+                                </div>
+                                <% } %>
+                    </div>
+
+                    <!-- ══ EXPERIENCES PANEL ══ -->
+                    <div id="panel-exp" style="display:none;">
+                        <% if(experiences.length===0) { %>
+                            <div class="dd-empty">
+                                <i class="fa-solid fa-mountain-sun"></i>
+                                <p>No experiences available in <%= destination.name %> yet. Check back soon!</p>
+                            </div>
+                            <% } else { %>
+                                <div class="exp-grid">
+                                    <% for(let exp of experiences) { %>
+                                        <a href="/experiences/<%= exp._id %>" class="exp-link">
+                                            <div class="exp-card">
+                                                <div class="exp-img-wrap">
+                                                    <% const expImgUrl=(exp.images && exp.images.length> 0 &&
+                                                        exp.images[0].url) ? exp.images[0].url :
+                                                        '/images/default-experience.png'; %>
+                                                        <img src="<%= expImgUrl %>" alt="<%= exp.title %>"
+                                                            onerror="this.onerror=null; this.src='/images/default-experience.png';"
+                                                            style="display:block;width:100%;aspect-ratio:16/9;height:auto;object-fit:cover;object-position:center;transition:transform 0.5s;">
+                                                </div>
+                                                <div class="exp-body">
+                                                    <span
+                                                        class="exp-badge exp-badge-<%= exp.difficulty.toLowerCase() %>">
+                                                        <%= exp.difficulty %>
+                                                    </span>
+                                                    <div class="exp-title">
+                                                        <%= exp.title %>
+                                                    </div>
+                                                    <div class="exp-meta">
+                                                        <span><i class="fa-regular fa-clock"></i>
+                                                            <%= exp.duration %>
+                                                        </span>
+                                                        <span>&#8377; <%= exp.price.toLocaleString("en-IN") %>
+                                                                /person</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                        <% } %>
+                                </div>
+                                <% } %>
+                    </div>
+
+        </div><!-- /dd-body -->
+
+        <style>
+            .dd-hero{position:relative;width:100%;height:360px;overflow:hidden}
+            .dd-hero-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,10,25,.82) 0%,rgba(10,10,25,.08) 60%);pointer-events:none}
+            .dd-hero-content{position:absolute;bottom:0;left:0;right:0;padding:1.75rem 2.5rem;z-index:2}
+            .dd-breadcrumb{display:inline-flex;align-items:center;gap:.4rem;color:rgba(255,255,255,.65);font-size:.82rem;font-weight:500;text-decoration:none;margin-bottom:.6rem;transition:color .2s}
+            .dd-breadcrumb:hover{color:white}
+            .dd-hero-title{font-size:2.4rem;font-weight:900;color:white;margin:0 0 .25rem;letter-spacing:-1px;line-height:1.1}
+            .dd-hero-country{font-size:.9rem;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:.4rem;margin:0 0 .85rem}
+            .dd-hero-pills{display:flex;gap:.65rem;flex-wrap:wrap}
+            .dd-pill{display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.14);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.22);color:white;font-size:.78rem;font-weight:600;padding:.25rem .85rem;border-radius:50px}
+            .dd-pill i{color:#fbbf24;font-size:.7rem}
+            @media(max-width:640px){.dd-hero{height:300px}.dd-hero-title{font-size:1.75rem}.dd-hero-content{padding:1.25rem}}
+            .dd-body{width:100%;max-width:1200px;margin:0 auto;padding:2rem 2rem 3rem}
+            .dd-tabs{display:flex;gap:.25rem;margin:2rem 0 1.5rem;border-bottom:2px solid var(--border)}
+            .dd-tab{display:flex;align-items:center;gap:.45rem;padding:.65rem 1.4rem;border:none;background:transparent;font-family:'Inter',sans-serif;font-size:.92rem;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .2s}
+            .dd-tab:hover{color:var(--dark)}
+            .dd-tab.active{color:var(--brand);border-bottom-color:var(--brand)}
+            .dd-tab-count{background:#f1f5f9;color:var(--muted);font-size:.7rem;font-weight:700;padding:.1rem .5rem;border-radius:50px}
+            .dd-tab.active .dd-tab-count{background:var(--brand);color:white}
+            .dd-empty{text-align:center;padding:3rem 2rem;color:var(--muted);background:#f9fafb;border-radius:12px}
+            .dd-empty i{display:block;font-size:2rem;color:#d1d5db;margin-bottom:.75rem}
+            .dd-empty p{margin:0;font-size:.9rem}
+            .exp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.5rem}
+            .exp-link{text-decoration:none;color:inherit;display:block;border-radius:14px;transition:transform .3s}
+            .exp-link:hover{transform:translateY(-4px)}
+            .exp-card{border-radius:14px;overflow:hidden;background:white;box-shadow:var(--shadow-sm);transition:box-shadow .3s}
+            .exp-link:hover .exp-card{box-shadow:var(--shadow-lg)}
+            .exp-img-wrap{overflow:hidden}
+            .exp-link:hover .exp-img-wrap img{transform:scale(1.06)}
+            .exp-body{padding:.9rem 1.1rem 1rem}
+            .exp-badge{display:inline-block;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:.18rem .6rem;border-radius:50px;margin-bottom:.4rem}
+            .exp-badge-easy{background:#ecfdf5;color:#059669}
+            .exp-badge-moderate{background:#fff7ed;color:#d97706}
+            .exp-badge-challenging{background:#fef2f2;color:#dc2626}
+            .exp-badge-extreme{background:#faf5ff;color:#7c3aed}
+            .exp-title{font-weight:700;font-size:.95rem;color:var(--dark);margin-bottom:.35rem}
+            .exp-meta{display:flex;gap:1rem;font-size:.78rem;color:var(--muted)}
+            .exp-meta i{color:var(--brand);margin-right:.2rem;font-size:.68rem}
+        </style>
+
+        <script>
+            function switchTab(tab) {
+                document.getElementById('panel-stays').style.display = tab === 'stays' ? 'block' : 'none';
+                document.getElementById('panel-exp').style.display = tab === 'exp' ? 'block' : 'none';
+                document.getElementById('tab-stays').classList.toggle('active', tab === 'stays');
+                document.getElementById('tab-exp').classList.toggle('active', tab === 'exp');
+            }
+        </script>
+    </body>

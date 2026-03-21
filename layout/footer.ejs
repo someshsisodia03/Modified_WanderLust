@@ -1,0 +1,104 @@
+<style>
+    .wl-footer {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: #cbd5e1;
+        padding: 2.5rem 1.5rem 1.5rem;
+    }
+
+    .wl-footer .brand-name {
+        font-size: 1.4rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fe424d, #ff7b82);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.5px;
+    }
+
+    .wl-footer .tagline {
+        font-size: 0.85rem;
+        color: #94a3b8;
+        margin-top: 0.2rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .wl-footer .social-links {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .wl-footer .social-links a {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #cbd5e1;
+        text-decoration: none;
+        font-size: 1rem;
+        transition: all 0.25s ease;
+    }
+
+    .wl-footer .social-links a:hover {
+        background: linear-gradient(135deg, #fe424d, #ff7b82);
+        border-color: transparent;
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(254, 66, 77, 0.4);
+    }
+
+    .wl-footer .footer-divider {
+        border: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        margin: 1rem 0;
+    }
+
+    .wl-footer .footer-bottom {
+        font-size: 0.8rem;
+        color: #64748b;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.2rem;
+    }
+
+    .wl-footer .footer-bottom a {
+        color: #94a3b8;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .wl-footer .footer-bottom a:hover {
+        color: #fe424d;
+    }
+</style>
+
+<footer class="wl-footer text-center">
+    <div class="container">
+        <div class="brand-name"><i class="fa-regular fa-compass"></i> WanderLust</div>
+        <p class="tagline">Discover your next adventure</p>
+
+        <div class="social-links">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+
+        <hr class="footer-divider">
+
+        <div class="footer-bottom">
+            <span>© 2024 <a href="https://www.airbnb.co.in" target="_blank">WanderLust.com</a></span>
+            <span>·</span>
+            <a href="#">Privacy Policy</a>
+            <span>·</span>
+            <a href="#">Terms of Service</a>
+        </div>
+    </div>
+</footer>

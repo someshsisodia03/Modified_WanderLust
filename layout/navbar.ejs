@@ -1,0 +1,69 @@
+<nav class="navbar navbar-expand-md sticky-top border-bottom">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand" href="/destinations">
+      <i class="fa-regular fa-compass"></i> WanderLust
+    </a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <div class="navbar-nav">
+        <a class="nav-link" href="/destinations"><i class="fa-solid fa-compass me-1"></i>Destinations</a>
+        <% if(curruser){ %>
+          <a class="nav-link" href="/listing"><i class="fa-solid fa-bed me-1"></i>Stays</a>
+          <a class="nav-link" href="/experiences"><i class="fa-solid fa-person-hiking me-1"></i>Experiences</a>
+        <% } %>
+      </div>
+      <% if(curruser){ %>
+      <div class="navbar-search-wrap">
+        <form class="search-form" role="search" id="navSearchForm" action="/listing" method="GET">
+          <input class="form-control srch" type="search" name="search" id="navSearchInput"
+            placeholder="Search destinations, cities, categories…" value="<%= locals.searchQuery || '' %>"
+            autocomplete="off">
+          <button class="btn btn-search" type="submit">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span class="ms-1">Search</span>
+          </button>
+        </form>
+      </div>
+      <script>
+        (function() {
+            var path = window.location.pathname;
+            var form = document.getElementById('navSearchForm');
+            var input = document.getElementById('navSearchInput');
+            if (path.startsWith('/destinations')) {
+                form.action = '/destinations';
+                input.placeholder = 'Search destinations, countries…';
+            } else if (path.startsWith('/experiences')) {
+                form.action = '/experiences';
+                input.placeholder = 'Search experiences, activities…';
+            } else {
+                form.action = '/listing';
+                input.placeholder = 'Search stays, cities, categories…';
+            }
+        })();
+      </script>
+      <% } %>
+      <div class="navbar-nav ms-auto align-items-center gap-1">
+        <% if(curruser){ %>
+          <a class="nav-link" href="/addListingDetail"><i class="fa-solid fa-plus me-1"></i>Add</a>
+        <% } %>
+        <% if(!curruser){ %>
+          <a class="nav-link" href="/listing/signup">Sign Up</a>
+          <a href="/listing/login" class="btn-wl"
+            style="padding:0.4rem 1.2rem; font-size:0.88rem; text-decoration:none; border-radius:50px;">
+            <i class="fa-solid fa-right-to-bracket me-1"></i>Login
+          </a>
+          <% } %>
+            <% if(curruser){ %>
+              <span class="nav-link text-muted" style="font-size:0.85rem;">Hi, <%= curruser.username %>!</span>
+              <a href="/logout" class="btn-wl-outline"
+                style="font-size:0.85rem; padding:0.35rem 1rem; text-decoration:none; border-radius:50px;">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+              </a>
+              <% } %>
+      </div>
+    </div>
+  </div>
+</nav>

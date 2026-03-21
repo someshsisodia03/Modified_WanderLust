@@ -1,0 +1,109 @@
+<% layout('boilerplate') -%>
+
+    <body>
+        <!-- Category Filters -->
+        <div class="filters">
+            <div class="filter <% if(activeCategory==='Trending') { %>active<% } %>">
+                <a href="/experiences/filter/Trending"><i class="fa-solid fa-fire"></i><p class="icon-text">Trending</p></a>
+            </div>
+            <div class="filter <% if(activeCategory==='Rooms') { %>active<% } %>">
+                <a href="/experiences/filter/Rooms"><i class="fa-solid fa-bed"></i><p class="icon-text">Rooms</p></a>
+            </div>
+            <div class="filter <% if(activeCategory==='Iconic Cities') { %>active<% } %>">
+                <a href="/experiences/filter/Iconic Cities"><i class="fa-solid fa-mountain-city"></i><p class="icon-text">Iconic Cities</p></a>
+            </div>
+            <div class="filter <% if(activeCategory==='Mountains') { %>active<% } %>">
+                <a href="/experiences/filter/Mountains"><i class="fa-solid fa-mountain"></i><p class="icon-text">Mountains</p></a>
+            </div>
+            <div class="filter <% if(activeCategory==='Castles') { %>active<% } %>">
+                <a href="/experiences/filter/Castles"><i class="fa-brands fa-fort-awesome"></i><p class="icon-text">Castles</p></a>
+            </div>
+            <div class="filter <% if(activeCategory==='Beaches') { %>active<% } %>">
+                <a href="/experiences/filter/Beaches"><i class="fa-solid fa-person-swimming"></i><p class="icon-text">Beaches</p></a>
+            </div>
+            <div class="filter <% if(activeCategory==='Camping') { %>active<% } %>">
+                <a href="/experiences/filter/Camping"><i class="fa-solid fa-campground"></i><p class="icon-text">Camping</p></a>
+            </div>
+            <div class="filter <% if(activeCategory==='Farms') { %>active<% } %>">
+                <a href="/experiences/filter/Farms"><i class="fa-solid fa-tractor"></i><p class="icon-text">Farms</p></a>
+            </div>
+            <div class="filter <% if(activeCategory==='Arctic') { %>active<% } %>">
+                <a href="/experiences/filter/Arctic"><i class="fa-regular fa-snowflake"></i><p class="icon-text">Arctic</p></a>
+            </div>
+            <a href="/experiences" class="tax-box ms-auto" style="text-decoration:none; color:var(--text);">
+                <i class="fa-solid fa-arrow-left" style="color:var(--brand);"></i> All experiences
+            </a>
+        </div>
+
+        <!-- Search Results Banner -->
+        <% if(typeof searchQuery !== 'undefined' && searchQuery && searchQuery.length > 0){ %>
+            <div style="padding: 0.75rem 2.5rem; background:#fff8f8; border-bottom:1px solid #fee2e2; display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                <i class="fa-solid fa-magnifying-glass" style="color:var(--brand);"></i>
+                <span style="font-size:0.92rem; font-weight:600; color:var(--dark);">
+                    <%= experiences.length %> result<%= experiences.length !== 1 ? 's' : '' %> for
+                    "<span style="color:var(--brand);"><%= searchQuery %></span>"
+                </span>
+                <a href="/experiences" style="margin-left:auto; font-size:0.85rem; color:var(--muted); text-decoration:none; display:flex; align-items:center; gap:0.3rem; border:1px solid var(--border); border-radius:50px; padding:0.25rem 0.9rem;">
+                    <i class="fa-solid fa-xmark"></i> Clear
+                </a>
+            </div>
+        <% } %>
+
+        <!-- Experience Cards -->
+        <% if(experiences.length === 0) { %>
+            <div style="text-align:center; padding:5rem 2rem; color:var(--muted);">
+                <i class="fa-solid fa-mountain-sun" style="font-size:3rem; margin-bottom:1rem; color:#d1d5db;"></i>
+                <% if(typeof searchQuery !== 'undefined' && searchQuery){ %>
+                    <p style="font-size:1.1rem; font-weight:600;">No experiences found for "<%= searchQuery %>"</p>
+                    <p style="font-size:0.9rem; margin-bottom:1rem;">Try a different keyword</p>
+                    <a href="/experiences" class="btn-wl" style="text-decoration:none;">Clear Search</a>
+                <% } else if(activeCategory) { %>
+                    <p style="font-size:1.1rem; font-weight:600;">No experiences found in "<%= activeCategory %>"</p>
+                    <a href="/experiences" class="btn-wl" style="text-decoration:none; margin-top:0.5rem;">View all experiences</a>
+                <% } else { %>
+                    <p style="font-size:1.1rem; font-weight:600;">No experiences available yet</p>
+                <% } %>
+            </div>
+        <% } else { %>
+            <div class="cards">
+                <% for(let exp of experiences) { %>
+                    <a href="/experiences/<%= exp._id %>" class="cardLink">
+                        <div class="card">
+                            <div style="overflow:hidden; position:relative;">
+                                <% const expImg = (exp.images && exp.images.length > 0 && exp.images[0].url)
+                                    ? exp.images[0].url
+                                    : '/images/default-experience.png'; %>
+                                <img src="<%= expImg %>" class="card-img-top" alt="<%= exp.title %>"
+                                     onerror="this.onerror=null; this.src='/images/default-experience.png';">
+                                <!-- Difficulty badge -->
+                                <span style="position:absolute; top:0.6rem; right:0.6rem; font-size:0.7rem; font-weight:700;
+                                    text-transform:uppercase; letter-spacing:0.5px; padding:0.2rem 0.65rem; border-radius:50px;
+                                    background:<%= exp.difficulty === 'Easy' ? '#ecfdf5' : exp.difficulty === 'Moderate' ? '#fff7ed' : exp.difficulty === 'Challenging' ? '#fef2f2' : '#faf5ff' %>;
+                                    color:<%= exp.difficulty === 'Easy' ? '#059669' : exp.difficulty === 'Moderate' ? '#d97706' : exp.difficulty === 'Challenging' ? '#dc2626' : '#7c3aed' %>;">
+                                    <%= exp.difficulty %>
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-title-text"><%= exp.title %></div>
+                                <div class="card-location">
+                                    <% if(exp.destination) { %>
+                                        <i class="fa-solid fa-location-dot me-1" style="color:var(--brand);font-size:0.75rem;"></i>
+                                        <%= exp.destination.name %>, <%= exp.destination.country %>
+                                    <% } %>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.4rem;">
+                                    <div class="card-price">
+                                        &#8377; <%= exp.price.toLocaleString("en-IN") %>
+                                        <span>/person</span>
+                                    </div>
+                                    <span style="font-size:0.75rem; color:var(--muted);">
+                                        <i class="fa-regular fa-clock me-1"></i><%= exp.duration %>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                <% } %>
+            </div>
+        <% } %>
+    </body>

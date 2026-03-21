@@ -1,0 +1,52 @@
+<% layout('boilerplate') -%>
+
+    <body>
+        <div
+            style="min-height:80vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#fff0f1 0%,#fafafa 100%); padding: 2rem 1rem;">
+            <div class="wl-form-card" style="max-width:440px;">
+                <div class="text-center mb-4">
+                    <div style="font-size:2.5rem; margin-bottom:0.5rem;">🌍</div>
+                    <div class="wl-form-title">Join WanderLust</div>
+                    <div class="wl-form-subtitle">Create an account and start exploring amazing places</div>
+                </div>
+
+                <form method="POST" action="/addSignup">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <div style="position:relative;">
+                            <i class="fa-solid fa-envelope"
+                                style="position:absolute;left:0.85rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:0.9rem;"></i>
+                            <input type="email" class="form-control" id="email" placeholder="you@example.com"
+                                name="email" required style="padding-left:2.5rem;">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <div style="position:relative;">
+                            <i class="fa-solid fa-user"
+                                style="position:absolute;left:0.85rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:0.9rem;"></i>
+                            <input type="text" class="form-control" id="username" placeholder="Choose a username"
+                                name="username" required style="padding-left:2.5rem;">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Password</label>
+                        <div style="position:relative;">
+                            <i class="fa-solid fa-lock"
+                                style="position:absolute;left:0.85rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:0.9rem;"></i>
+                            <input type="password" class="form-control" id="password"
+                                placeholder="Create a strong password" name="password" required
+                                style="padding-left:2.5rem;">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-wl w-100" style="justify-content:center;">
+                        <i class="fa-solid fa-user-plus"></i> Create Account
+                    </button>
+                    <p class="text-center mt-3" style="font-size:0.88rem; color:var(--muted);">
+                        Already have an account? <a href="/listing/login"
+                            style="color:var(--brand); font-weight:600; text-decoration:none;">Log in</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </body>

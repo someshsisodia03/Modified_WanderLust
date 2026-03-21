@@ -1,0 +1,112 @@
+<% layout('boilerplate') -%>
+
+    <body>
+        <!-- Category Filters -->
+        <div class="filters">
+            <div class="filter"><a href="/listing/show/Trending"><i class="fa-solid fa-fire"></i>
+                    <p class="icon-text">Trending</p>
+                </a></div>
+            <div class="filter"><a href="/listing/show/Rooms"><i class="fa-solid fa-bed"></i>
+                    <p class="icon-text">Rooms</p>
+                </a></div>
+            <div class="filter"><a href="/listing/show/Iconic Cities"><i class="fa-solid fa-mountain-city"></i>
+                    <p class="icon-text">Iconic Cities</p>
+                </a></div>
+            <div class="filter"><a href="/listing/show/Mountains"><i class="fa-solid fa-mountain"></i>
+                    <p class="icon-text">Mountains</p>
+                </a></div>
+            <div class="filter"><a href="/listing/show/Castles"><i class="fa-brands fa-fort-awesome"></i>
+                    <p class="icon-text">Castles</p>
+                </a></div>
+            <div class="filter"><a href="/listing/show/Beaches"><i class="fa-solid fa-person-swimming"></i>
+                    <p class="icon-text">Beaches</p>
+                </a></div>
+            <div class="filter"><a href="/listing/show/Camping"><i class="fa-solid fa-campground"></i>
+                    <p class="icon-text">Camping</p>
+                </a></div>
+            <div class="filter"><a href="/listing/show/Farms"><i class="fa-solid fa-tractor"></i>
+                    <p class="icon-text">Farms</p>
+                </a></div>
+            <div class="filter"><a href="/listing/show/Arctic"><i class="fa-regular fa-snowflake"></i>
+                    <p class="icon-text">Arctic</p>
+                </a></div>
+
+            <div class="tax-box ms-auto">
+                <div class="form-check-reverse form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                    <label class="form-check-label" for="flexSwitchCheckDefault"
+                        style="font-size:0.85rem;font-weight:500;">Show price with taxes</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Results Banner -->
+        <% if(searchQuery && searchQuery.length> 0){ %>
+            <div
+                style="padding: 0.75rem 2.5rem; background:#fff8f8; border-bottom:1px solid #fee2e2; display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                <i class="fa-solid fa-magnifying-glass" style="color:var(--brand);"></i>
+                <span style="font-size:0.92rem; font-weight:600; color:var(--dark);">
+                    <%= listdata.length %> result<%= listdata.length !==1 ? 's' : '' %> for
+                            "<span style="color:var(--brand);">
+                                <%= searchQuery %>
+                            </span>"
+                </span>
+                <a href="/listing"
+                    style="margin-left:auto; font-size:0.85rem; color:var(--muted); text-decoration:none; display:flex; align-items:center; gap:0.3rem; border:1px solid var(--border); border-radius:50px; padding:0.25rem 0.9rem; transition:all 0.2s;">
+                    <i class="fa-solid fa-xmark"></i> Clear
+                </a>
+            </div>
+            <% } %>
+
+                <!-- Cards Grid -->
+                <% if(listdata.length===0) { %>
+                    <div style="text-align:center; padding: 5rem 2rem; color: var(--muted);">
+                        <i class="fa-solid fa-magnifying-glass"
+                            style="font-size:3rem; margin-bottom:1rem; color:#d1d5db;"></i>
+                        <% if(searchQuery){ %>
+                            <p style="font-size:1.1rem; font-weight:600;">No listings found for "<%= searchQuery %>"</p>
+                            <p style="font-size:0.9rem; margin-bottom:1rem;">Try a different keyword — location,
+                                country, or category</p>
+                            <% } else { %>
+                                <p style="font-size:1.1rem; font-weight:600;">No listings found</p>
+                                <% } %>
+                                    <a href="/listing" class="btn-wl"
+                                        style="text-decoration:none; margin-top:0.5rem;">View all listings</a>
+                    </div>
+                    <% } else { %>
+                        <div class="cards">
+                            <% for (let x of listdata){ %>
+                                <a href="/moreabout/<%=x.id%>" class="cardLink">
+                                    <div class="card">
+                                        <div style="overflow:hidden;">
+                                            <img src="<%=x.image.url%>" class="card-img-top" alt="<%=x.title%>">
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="card-title-text">
+                                                <%=x.title%>
+                                            </div>
+                                            <div class="card-location"><i class="fa-solid fa-location-dot me-1"
+                                                    style="color:var(--brand);font-size:0.75rem;"></i>
+                                                <%=x.location%>, <%=x.country%>
+                                            </div>
+                                            <div class="card-price">
+                                                &#8377; <%=x.price.toLocaleString("en-IN")%>
+                                                    <span>/night <i class="tax-info">+GST</i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                                <% } %>
+                        </div>
+                        <% } %>
+
+                            <script>
+                                let toggler = document.getElementById("flexSwitchCheckDefault");
+                                toggler.addEventListener("click", () => {
+                                    let ele = document.getElementsByClassName("tax-info");
+                                    for (let x of ele) {
+                                        x.style.display = (x.style.display === "none" || x.style.display === "") ? "inline" : "none";
+                                    }
+                                });
+                            </script>
+    </body>

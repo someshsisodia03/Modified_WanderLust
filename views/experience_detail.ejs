@@ -1,0 +1,162 @@
+<% layout('boilerplate') -%>
+
+    <body>
+        <div class="detail-wrapper">
+
+        <!-- Main image -->
+        <% const defaultExpImg = '/images/default-experience.png'; %>
+        <% const expDetailImg = (experience.images && experience.images.length > 0 && experience.images[0].url) ? experience.images[0].url : defaultExpImg; %>
+        <div style="width:100%; overflow:hidden; border-radius:var(--radius); background:#1e293b; box-shadow:var(--shadow-md);">
+            <img src="<%= expDetailImg %>"
+                 alt="<%= experience.title %>"
+                 onerror="this.onerror=null; this.src='/images/default-experience.png';"
+                 style="width:100%; aspect-ratio:16/9; height:auto; object-fit:cover; object-position:center; display:block;">
+        </div>
+
+        <!-- ── Main Info Card ── -->
+        <div class="detail-card">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                <div>
+                    <div class="detail-title"><%= experience.title %></div>
+                    <div class="detail-meta">
+                        <% if(experience.destination) { %>
+                            <i class="fa-solid fa-location-dot me-1" style="color:var(--brand);"></i>
+                            <%= experience.destination.name %>, <%= experience.destination.country %>
+                            &nbsp;·&nbsp;
+                        <% } %>
+                        <% if(experience.owner) { %>
+                            Posted by <strong><%= experience.owner.username %></strong>
+                        <% } %>
+                    </div>
+                </div>
+                <div style="font-size:1.6rem; font-weight:800; color:var(--brand);">
+                    &#8377; <%= experience.price.toLocaleString("en-IN") %>
+                    <span style="font-size:0.9rem; font-weight:400; color:var(--muted);">/person</span>
+                </div>
+            </div>
+
+            <p class="detail-desc mt-3"><%= experience.description %></p>
+
+            <div class="detail-info-grid">
+                <div class="detail-info-item">
+                    <strong>Duration</strong>
+                    <%= experience.duration %>
+                </div>
+                <div class="detail-info-item">
+                    <strong>Difficulty</strong>
+                    <span style="color:<%= experience.difficulty === 'Easy' ? '#059669' : experience.difficulty === 'Moderate' ? '#d97706' : experience.difficulty === 'Challenging' ? '#dc2626' : '#7c3aed' %>; font-weight:600;">
+                        <%= experience.difficulty %>
+                    </span>
+                </div>
+                <div class="detail-info-item">
+                    <strong>Category</strong>
+                    <%= experience.category %>
+                </div>
+                <div class="detail-info-item">
+                    <strong>Price</strong>
+                    &#8377; <%= experience.price.toLocaleString("en-IN") %> per person
+                </div>
+            </div>
+
+            <!-- Owner Actions -->
+            <% if(curruser && experience.owner && curruser._id.equals(experience.owner._id)){ %>
+                <div class="d-flex gap-2 mt-3 flex-wrap">
+                    <form method="post" action="/experiences/<%= experience._id %>?_method=DELETE" style="margin:0;">
+                        <button class="btn-wl" type="submit"
+                            style="background:linear-gradient(135deg,#dc2626,#ef4444);">
+                            <i class="fa-solid fa-trash"></i> Delete Experience
+                        </button>
+                    </form>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- ── Back to Destination link ── -->
+        <% if(experience.destination) { %>
+            <div style="margin-top:1rem;">
+                <a href="/destinations/<%= experience.destination._id %>" class="btn-wl-outline" style="text-decoration:none;">
+                    <i class="fa-solid fa-arrow-left"></i> Back to <%= experience.destination.name %>
+                </a>
+            </div>
+        <% } %>
+
+        <!-- ── Leave a Review ── -->
+        <% if(curruser){ %>
+            <div class="detail-card mt-3">
+                <div class="section-title"><i class="fa-solid fa-star" style="color:var(--brand);"></i> Leave a Review</div>
+                <form class="needs-validation" method="post" action="/experiences/<%= experience._id %>/review" novalidate>
+                    <div class="mb-3">
+                        <label for="comment" class="form-label">Your Comment</label>
+                        <textarea class="form-control" name="comment" id="comment"
+                            placeholder="Share your experience…" rows="4" required></textarea>
+                        <div class="invalid-feedback">Please write a review before submitting.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rating</label>
+                        <fieldset class="starability-slot">
+                            <legend class="visually-hidden">Rating</legend>
+                            <input type="radio" id="exp-no-rate" class="input-no-rate" name="rating" value="0" checked
+                                aria-label="No rating." />
+                            <input type="radio" id="exp-rate1" name="rating" value="1" />
+                            <label for="exp-rate1" title="Terrible">1 star</label>
+                            <input type="radio" id="exp-rate2" name="rating" value="2" />
+                            <label for="exp-rate2" title="Not good">2 stars</label>
+                            <input type="radio" id="exp-rate3" name="rating" value="3" />
+                            <label for="exp-rate3" title="Average">3 stars</label>
+                            <input type="radio" id="exp-rate4" name="rating" value="4" />
+                            <label for="exp-rate4" title="Very good">4 stars</label>
+                            <input type="radio" id="exp-rate5" name="rating" value="5" />
+                            <label for="exp-rate5" title="Amazing">5 stars</label>
+                        </fieldset>
+                    </div>
+                    <button type="submit" class="btn-wl"><i class="fa-solid fa-paper-plane"></i> Submit Review</button>
+                </form>
+            </div>
+        <% } %>
+
+        <!-- ── Reviews List ── -->
+        <% if(experience.reviews && experience.reviews.length > 0){ %>
+            <div class="detail-card mt-3">
+                <div class="section-title"><i class="fa-solid fa-comments" style="color:var(--brand);"></i>
+                    Reviews (<%= experience.reviews.length %>)</div>
+                <div class="row g-3">
+                    <% for(let x of experience.reviews){ %>
+                        <% const isOwnerReview = x.author && experience.owner && x.author._id.equals(experience.owner._id); %>
+                        <div class="col-md-6">
+                            <div class="review-card<%= isOwnerReview ? ' host-review' : '' %>">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="review-author">
+                                        <i class="fa-solid fa-user-circle me-1"
+                                            style="color:<%= isOwnerReview ? '#f59e0b' : 'var(--brand)' %>;"></i>
+                                        <%= x.author.username %>
+                                        <% if(isOwnerReview) { %>
+                                            <span class="host-badge"><i class="fa-solid fa-crown"></i> Creator</span>
+                                        <% } %>
+                                    </div>
+                                    <% if(curruser && curruser._id.equals(x.author._id)){ %>
+                                        <form method="post"
+                                            action="/experiences/<%= experience._id %>/review/<%= x._id %>/delete"
+                                            style="margin:0;">
+                                            <button class="btn-review-delete"><i
+                                                    class="fa-solid fa-trash me-1"></i>Delete</button>
+                                        </form>
+                                    <% } %>
+                                </div>
+                                <p class="starability-result" data-rating="<%= x.rating %>"></p>
+                                <p class="review-comment">"<%= x.comment %>"</p>
+                                <% if(x.createdAt){ %>
+                                    <small style="color:var(--muted); font-size:0.75rem;">
+                                        <i class="fa-regular fa-clock me-1"></i>
+                                        <%= new Date(x.createdAt).toLocaleDateString('en-IN',
+                                            {day:'numeric',month:'short',year:'numeric'}) %>
+                                    </small>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+
+        </div>
+    </body>

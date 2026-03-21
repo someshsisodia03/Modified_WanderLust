@@ -1,0 +1,232 @@
+<% layout('boilerplate') -%>
+
+    <body>
+        <div class="detail-wrapper">
+
+            <!-- Listing Image -->
+            <div style="width:100%; overflow:hidden; border-radius:var(--radius); background:#1e293b; box-shadow:var(--shadow-md);">
+                <img src="<%=optimizeImg(details.image.url, 1600, 900)%>" class="detail-img" alt="<%=details.title%>"
+                     style="width:100%; aspect-ratio:16/9; height:auto; object-fit:cover; object-position:center; border-radius:0; box-shadow:none; display:block;">
+            </div>
+
+            <!-- Main Info Card -->
+            <div class="detail-card">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                    <div>
+                        <div class="detail-title">
+                            <%=details.title%>
+                        </div>
+                        <div class="detail-meta">
+                            <i class="fa-solid fa-location-dot me-1" style="color:var(--brand);"></i>
+                            <%=details.location%>, <%=details.country%>
+                                    &nbsp;·&nbsp; Posted by <strong>
+                                        <%= details.owner ? details.owner.username : 'WanderLust' %>
+                                    </strong>
+                        </div>
+                    </div>
+                    <div style="font-size:1.6rem; font-weight:800; color:var(--brand);">
+                        &#8377; <%=details.price.toLocaleString("en-IN")%>
+                            <span style="font-size:0.9rem; font-weight:400; color:var(--muted);">/night</span>
+                    </div>
+                </div>
+
+                <p class="detail-desc mt-3">
+                    <%=details.description%>
+                </p>
+
+                <div class="detail-info-grid">
+                    <div class="detail-info-item"><strong>Location</strong>
+                        <%=details.location%>
+                    </div>
+                    <div class="detail-info-item"><strong>Country</strong>
+                        <%=details.country%>
+                    </div>
+                    <% if(details.category){ %>
+                        <div class="detail-info-item"><strong>Category</strong>
+                            <%=details.category%>
+                        </div>
+                        <% } %>
+                            <div class="detail-info-item"><strong>Price/night</strong>&#8377;
+                                <%=details.price.toLocaleString("en-IN")%>
+                            </div>
+                </div>
+
+                <!-- Owner Actions -->
+                <% if(curruser && details.owner && curruser._id.equals(details.owner._id)){ %>
+                    <div class="d-flex gap-2 mt-3 flex-wrap">
+                        <a href="/listing/edit/<%=details.id%>" class="btn-wl-outline" style="text-decoration:none;">
+                            <i class="fa-solid fa-pen"></i> Edit Listing
+                        </a>
+                        <form method="post" action="/deleteDetail/<%=details.id%>?_method=DELETE" style="margin:0;">
+                            <button class="btn-wl" type="submit"
+                                style="background:linear-gradient(135deg,#dc2626,#ef4444);">
+                                <i class="fa-solid fa-trash"></i> Delete
+                            </button>
+                        </form>
+                    </div>
+                    <% } %>
+            </div>
+
+            <!-- Leave a Review -->
+            <% if(curruser){ %>
+                <div class="detail-card mt-3">
+                    <div class="section-title"><i class="fa-solid fa-star" style="color:var(--brand);"></i> Leave a
+                        Review</div>
+                    <form class="needs-validation" method="post" action="/listing/<%=details.id%>/review" novalidate>
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Your Comment</label>
+                            <textarea class="form-control" name="comment" id="comment"
+                                placeholder="Share your experience at this place…" rows="4" required></textarea>
+                            <div class="invalid-feedback">Please write a review before submitting.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Rating</label>
+                            <fieldset class="starability-slot">
+                                <legend class="visually-hidden">Rating</legend>
+                                <input type="radio" id="no-rate" class="input-no-rate" name="rating" value="0" checked
+                                    aria-label="No rating." />
+                                <input type="radio" id="first-rate1" name="rating" value="1" />
+                                <label for="first-rate1" title="Terrible">1 star</label>
+                                <input type="radio" id="first-rate2" name="rating" value="2" />
+                                <label for="first-rate2" title="Not good">2 stars</label>
+                                <input type="radio" id="first-rate3" name="rating" value="3" />
+                                <label for="first-rate3" title="Average">3 stars</label>
+                                <input type="radio" id="first-rate4" name="rating" value="4" />
+                                <label for="first-rate4" title="Very good">4 stars</label>
+                                <input type="radio" id="first-rate5" name="rating" value="5" />
+                                <label for="first-rate5" title="Amazing">5 stars</label>
+                            </fieldset>
+                        </div>
+                        <button type="submit" class="btn-wl"><i class="fa-solid fa-paper-plane"></i> Submit
+                            Review</button>
+                    </form>
+                </div>
+                <% } %>
+
+                    <!-- Reviews List -->
+                    <% if(details.reviews.length> 0){ %>
+                        <div class="detail-card mt-3">
+                            <div class="section-title"><i class="fa-solid fa-comments" style="color:var(--brand);"></i>
+                                Reviews (<%=details.reviews.length%>)</div>
+                            <div class="row g-3">
+                                <% for(let x of details.reviews){ %>
+                                    <div class="col-md-6">
+                                        <div class="review-card">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="review-author"><i class="fa-solid fa-user-circle me-1"
+                                                        style="color:var(--brand);"></i>
+                                                    <%=x.author.username%>
+                                                </div>
+                                                <% if(curruser && curruser._id.equals(x.author._id)){ %>
+                                                    <form method="post"
+                                                        action="/delete/<%=details.id%>/review/<%=x.id%>"
+                                                        style="margin:0;">
+                                                        <button class="btn-review-delete"><i
+                                                                class="fa-solid fa-trash me-1"></i>Delete</button>
+                                                    </form>
+                                                    <% } %>
+                                            </div>
+                                            <p class="starability-result" data-rating="<%=x.rating%>"></p>
+                                            <p class="review-comment">"<%=x.comment%>"</p>
+                                            <% if(x.createdAt){ %>
+                                                <small style="color:var(--muted); font-size:0.75rem;">
+                                                    <i class="fa-regular fa-clock me-1"></i>
+                                                    <%= new Date(x.createdAt).toLocaleDateString('en-IN',
+                                                        {day:'numeric',month:'short',year:'numeric'}) %>
+                                                </small>
+                                                <% } %>
+                                        </div>
+                                    </div>
+                                    <% } %>
+                            </div>
+                        </div>
+                        <% } %>
+
+                            <!-- Map -->
+                            <div class="detail-card mt-3">
+                                <div class="section-title">
+                                    <i class="fa-solid fa-map-location-dot" style="color:var(--brand);"></i>
+                                    Location on Map
+                                </div>
+                                <div id="map-loading"
+                                    style="height:400px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f9fafb;border-radius:12px;gap:0.75rem;color:#6b7280;">
+                                    <i class="fa-solid fa-spinner fa-spin" style="font-size:2rem;color:#fe424d;"></i>
+                                    <span style="font-size:0.9rem;font-weight:500;">Loading map…</span>
+                                </div>
+                                <div class="map-wrapper" id="map-wrapper" style="display:none;">
+                                    <div id="map"></div>
+                                </div>
+                                <div id="map-error"
+                                    style="display:none;padding:1rem;background:#fff1f2;border-radius:12px;color:#b91c1c;font-size:0.9rem;text-align:center;">
+                                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                                    Could not find map location for <strong>
+                                        <%=details.location%>, <%=details.country%>
+                                    </strong>.
+                                </div>
+                            </div>
+
+        </div>
+
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script>
+            (function () {
+                var loc = <%-JSON.stringify((details.location || '').toString()) %>;
+                var country = <%-JSON.stringify((details.country || '').toString()) %>;
+                var title = <%-JSON.stringify((details.title || '').toString()) %>;
+
+                var loadingEl = document.getElementById('map-loading');
+                var wrapperEl = document.getElementById('map-wrapper');
+                var errorEl = document.getElementById('map-error');
+
+                var query = encodeURIComponent(loc + ', ' + country);
+                var geoUrl = '/api/geocode?q=' + query;
+
+                var timer = setTimeout(function () {
+                    loadingEl.style.display = 'none';
+                    errorEl.style.display = 'block';
+                }, 8000);
+
+                fetch(geoUrl, { headers: { 'Accept-Language': 'en' } })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        clearTimeout(timer);
+                        loadingEl.style.display = 'none';
+
+                        if (!data || data.length === 0) {
+                            errorEl.style.display = 'block';
+                            return;
+                        }
+
+                        var mapLat = parseFloat(data[0].lat);
+                        var mapLon = parseFloat(data[0].lon);
+
+                        wrapperEl.style.display = 'block';
+
+                        var map = L.map('map', { scrollWheelZoom: false }).setView([mapLat, mapLon], 12);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+                            maxZoom: 19
+                        }).addTo(map);
+
+                        var pin = L.divIcon({
+                            html: '<div style="width:22px;height:22px;background:#fe424d;border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.4);"></div>',
+                            iconSize: [22, 22],
+                            iconAnchor: [11, 11],
+                            popupAnchor: [0, -16],
+                            className: ''
+                        });
+                        L.marker([mapLat, mapLon], { icon: pin }).addTo(map)
+                            .bindPopup('<b>' + title + '</b><br><small>' + loc + ', ' + country + '</small>')
+                            .openPopup();
+
+                        setTimeout(function () { map.invalidateSize(); }, 300);
+                    })
+                    .catch(function () {
+                        clearTimeout(timer);
+                        loadingEl.style.display = 'none';
+                        errorEl.style.display = 'block';
+                    });
+            })();
+        </script>
+    </body>

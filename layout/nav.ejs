@@ -1,0 +1,35 @@
+<style>
+    .btn-search{
+      background-color: #fe424d;
+      color: white;
+    }
+    .btn-search:hover{
+      background-color: #fe424d;
+      color: white;
+    }
+    .btn{
+      border-radius: 5rem;
+    }
+    .form-control{
+      border-radius: 5rem;
+    }
+  </style>
+  <nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/listing"><i class="fa-regular fa-compass"></i> WanderLust</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav ms-auto">
+            <%if(!curruser){%>
+              <a class="nav-link" href="/listing/signup" style="font-weight: 650;"> SignUp</a>
+              <a class="nav-link" aria-current="page" href="/listing/login"  style="font-weight: 650;">Login</a>
+              <%}%>
+              <%if(curruser){%>
+              <a class="nav-link" aria-current="page" href="/logout"  style="font-weight: 650;">Logout</a>
+              <%}%>
+          </div>
+        </div>
+    </div>
+  </nav>

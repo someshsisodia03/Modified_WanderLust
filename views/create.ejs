@@ -1,0 +1,69 @@
+<% layout('boilerplate') -%>
+
+    <body>
+        <div class="forms" style="padding: 2.5rem 1rem;">
+            <div class="wl-form-card">
+                <div class="wl-form-title">✈️ Add a New Listing</div>
+                <div class="wl-form-subtitle">Share your amazing place with travellers around the world</div>
+
+                <form class="needs-validation" method="POST" action="/addDetail" novalidate
+                    enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" placeholder="Give your place a catchy title"
+                            name="title" required>
+                        <div class="valid-feedback">Looks great!</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="desc" class="form-label">Description</label>
+                        <textarea class="form-control" id="desc" name="description" rows="3"
+                            placeholder="Describe your listing — what makes it special?" required></textarea>
+                        <div class="invalid-feedback">Please fill in the description.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="url" class="form-label">Upload Image</label>
+                        <input type="file" class="form-control" id="url" name="url" accept="image/*" required>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="price" class="form-label">Price per Night (₹)</label>
+                            <input type="number" class="form-control" id="price" placeholder="e.g. 2500" name="price"
+                                min="0" required>
+                            <div class="invalid-feedback">Please enter a valid price.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="country" class="form-label">Country</label>
+                            <input type="text" class="form-control" id="country" name="country" placeholder="e.g. India"
+                                required>
+                            <div class="invalid-feedback">Please enter a country.</div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-control" id="category" name="category" required>
+                            <option value="">Select a category</option>
+                            <option value="Trending">🔥 Trending</option>
+                            <option value="Rooms">🛏️ Rooms</option>
+                            <option value="Iconic Cities">🌆 Iconic Cities</option>
+                            <option value="Mountains">⛰️ Mountains</option>
+                            <option value="Castles">🏰 Castles</option>
+                            <option value="Beaches">🏖️ Beaches</option>
+                            <option value="Camping">⛺ Camping</option>
+                            <option value="Farms">🚜 Farms</option>
+                            <option value="Arctic">❄️ Arctic</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a category.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="location" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="location" name="location"
+                            placeholder="e.g. Jaipur, Rajasthan" required>
+                        <div class="invalid-feedback">Please enter a location.</div>
+                    </div>
+                    <button type="submit" class="btn-wl w-100" style="justify-content:center;">
+                        <i class="fa-solid fa-plus"></i> Create Listing
+                    </button>
+                </form>
+            </div>
+        </div>
+    </body>
