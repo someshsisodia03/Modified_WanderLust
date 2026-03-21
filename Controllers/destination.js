@@ -24,7 +24,19 @@ module.exports.index = async (req, res) => {
         destinations.map(async (dest) => {
             const stayCount = await lstData.countDocuments({ destination: dest._id });
             const expCount  = await Experience.countDocuments({ destination: dest._id });
-            return { ...dest.toObject(), stayCount, expCount };
+
+            // If destination has no images, grab the first stay's image
+            let destObj = dest.toObject();
+            if (!destObj.images || destObj.images.length === 0) {
+                const firstStay = await lstData.findOne({ destination: dest._id });
+                if (firstStay && firstStay.image && firstStay.image.url) {
+                    dest.images = [{ url: firstStay.image.url, filename: firstStay.image.filename }];
+                    await dest.save();
+                    destObj.images = dest.images;
+                }
+            }
+
+            return { ...destObj, stayCount, expCount };
         })
     );
 

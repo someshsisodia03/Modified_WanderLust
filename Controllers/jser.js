@@ -31,7 +31,7 @@ async(req, res) => {
     let { username } = req.body;
     if(!res.locals.redirectUrl){
         req.flash("success", `Hi ${username}, Welcome back to WanderLust`);
-        return res.redirect("/listing");
+        return res.redirect("/destinations");
     }
     res.redirect(res.locals.redirectUrl);
 }
@@ -39,6 +39,6 @@ module.exports.logout=(req,res)=>{
     req.logout(()=>{
     req.flash("success","You have been successfully logged-out");
     res.locals.redirect=false;
-    res.redirect("/listing/login");
+    res.redirect("/");
     })
 }

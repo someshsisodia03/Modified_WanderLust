@@ -33,7 +33,7 @@ router.get("/listing/show/:category", isLogged, wrapAsync(listingController.filt
 router.get("/addListingDetail", isLogged, wrapAsync(listingController.createlisting))
 
 //Add the form....
-router.post("/addDetail", upload.single("url"), listingController.edit)
+router.post("/addDetail", upload.fields([{ name: "url", maxCount: 1 }, { name: "expImage", maxCount: 1 }]), listingController.edit)
 
 // Show the form for update the listing...
 

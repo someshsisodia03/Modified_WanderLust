@@ -3,7 +3,7 @@
     <body>
         <!-- ══ Hero Banner ══ -->
         <div class="dd-hero">
-            <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1600&q=80" alt="Destination background"
+            <img src="/images/aero.png" alt="Destination background"
                 style="width:100%; height:360px; object-fit:cover; display:block;">
             <div class="dd-hero-overlay"></div>
 
@@ -117,9 +117,9 @@
                                                 <div class="exp-img-wrap">
                                                     <% const expImgUrl=(exp.images && exp.images.length> 0 &&
                                                         exp.images[0].url) ? exp.images[0].url :
-                                                        '/images/default-experience.png'; %>
+                                                        '/images/aero.png'; %>
                                                         <img src="<%= expImgUrl %>" alt="<%= exp.title %>"
-                                                            onerror="this.onerror=null; this.src='/images/default-experience.png';"
+                                                            onerror="this.onerror=null; this.src='/images/aero.png';"
                                                             style="display:block;width:100%;aspect-ratio:16/9;height:auto;object-fit:cover;object-position:center;transition:transform 0.5s;">
                                                 </div>
                                                 <div class="exp-body">

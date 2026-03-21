@@ -2,7 +2,7 @@
 
     <body>
         <div class="forms" style="padding: 2.5rem 1rem;">
-            <div class="wl-form-card">
+            <div class="wl-form-card" style="max-width:640px;">
                 <div class="wl-form-title">✈️ Add a New Listing</div>
                 <div class="wl-form-subtitle">Share your amazing place with travellers around the world</div>
 
@@ -60,10 +60,122 @@
                             placeholder="e.g. Jaipur, Rajasthan" required>
                         <div class="invalid-feedback">Please enter a location.</div>
                     </div>
+
+                    <!-- ── Optional Experience Section ── -->
+                    <div class="exp-toggle-wrap mb-3" style="
+                        border: 1.5px solid var(--border);
+                        border-radius: 14px;
+                        overflow: hidden;
+                        transition: border-color 0.3s ease;
+                    ">
+                        <label for="addExpToggle" class="exp-toggle-header" style="
+                            display: flex; align-items: center; gap: 0.75rem;
+                            padding: 0.85rem 1.1rem; cursor: pointer;
+                            background: #f9fafb; margin: 0;
+                            font-weight: 600; font-size: 0.95rem; color: var(--dark);
+                            transition: background 0.25s ease;
+                        ">
+                            <input type="checkbox" id="addExpToggle" name="addExperience" value="yes" style="
+                                accent-color: var(--brand); width: 18px; height: 18px; cursor: pointer;
+                            ">
+                            <span style="flex:1;">🎯 Also add an Experience <span style="
+                                font-weight: 400; font-size: 0.82rem; color: var(--muted);
+                            ">(optional)</span></span>
+                            <i class="fa-solid fa-chevron-down exp-chevron" style="
+                                font-size: 0.75rem; color: var(--muted);
+                                transition: transform 0.3s ease;
+                            "></i>
+                        </label>
+
+                        <div id="expFields" style="
+                            max-height: 0; overflow: hidden;
+                            transition: max-height 0.4s ease, padding 0.3s ease;
+                            padding: 0 1.1rem;
+                        ">
+                            <div style="padding-top: 0.75rem; padding-bottom: 1rem;">
+                                <div class="mb-3">
+                                    <label for="expTitle" class="form-label">Experience Title</label>
+                                    <input type="text" class="form-control" id="expTitle" name="expTitle"
+                                        placeholder="e.g. Sunset Camel Safari">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="expDesc" class="form-label">Experience Description</label>
+                                    <textarea class="form-control" id="expDesc" name="expDescription" rows="2"
+                                        placeholder="Describe the experience — what will travellers do?"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="expImage" class="form-label">Experience Image</label>
+                                    <input type="file" class="form-control" id="expImage" name="expImage" accept="image/*">
+                                    <div style="font-size:0.78rem; color:var(--muted); margin-top:0.25rem;">
+                                        Leave empty to use the listing image
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="expCategory" class="form-label">Category</label>
+                                    <select class="form-control" id="expCategory" name="expCategory">
+                                        <option value="">Same as listing</option>
+                                        <option value="Trending">🔥 Trending</option>
+                                        <option value="Rooms">🛏️ Rooms</option>
+                                        <option value="Iconic Cities">🌆 Iconic Cities</option>
+                                        <option value="Mountains">⛰️ Mountains</option>
+                                        <option value="Castles">🏰 Castles</option>
+                                        <option value="Beaches">🏖️ Beaches</option>
+                                        <option value="Camping">⛺ Camping</option>
+                                        <option value="Farms">🚜 Farms</option>
+                                        <option value="Arctic">❄️ Arctic</option>
+                                    </select>
+                                </div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-4">
+                                        <label for="expDuration" class="form-label">Duration</label>
+                                        <input type="text" class="form-control" id="expDuration" name="expDuration"
+                                            placeholder="e.g. 3 hours">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="expDifficulty" class="form-label">Difficulty</label>
+                                        <select class="form-control" id="expDifficulty" name="expDifficulty">
+                                            <option value="Easy">🟢 Easy</option>
+                                            <option value="Moderate">🟡 Moderate</option>
+                                            <option value="Challenging">🟠 Challenging</option>
+                                            <option value="Extreme">🔴 Extreme</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="expPrice" class="form-label">Price (₹/person)</label>
+                                        <input type="number" class="form-control" id="expPrice" name="expPrice"
+                                            placeholder="e.g. 1500" min="0">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn-wl w-100" style="justify-content:center;">
                         <i class="fa-solid fa-plus"></i> Create Listing
                     </button>
                 </form>
             </div>
         </div>
+
+        <script>
+            // Toggle experience fields
+            const toggle = document.getElementById('addExpToggle');
+            const expFields = document.getElementById('expFields');
+            const chevron = document.querySelector('.exp-chevron');
+            const wrap = document.querySelector('.exp-toggle-wrap');
+
+            toggle.addEventListener('change', () => {
+                if (toggle.checked) {
+                    expFields.style.maxHeight = expFields.scrollHeight + 'px';
+                    expFields.style.padding = '0 1.1rem';
+                    chevron.style.transform = 'rotate(180deg)';
+                    wrap.style.borderColor = 'var(--brand)';
+                } else {
+                    expFields.style.maxHeight = '0';
+                    chevron.style.transform = 'rotate(0)';
+                    wrap.style.borderColor = 'var(--border)';
+                }
+            });
+        </script>
     </body>

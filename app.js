@@ -77,8 +77,21 @@ app.use((req, res, next) => {
     next();
 })
 
-// Homepage — redirect to destinations
-app.get("/", (req, res) => res.redirect("/destinations"));
+// Homepage — stunning landing page
+const Destination = require('./Models/destinationModel.js');
+const lstData = require('./Models/lstingModel.js');
+const Experience = require('./Models/experienceModel.js');
+
+app.get("/", async (req, res) => {
+    try {
+        const destCount = await Destination.countDocuments();
+        const stayCount = await lstData.countDocuments();
+        const expCount  = await Experience.countDocuments();
+        res.render('home.ejs', { destCount, stayCount, expCount });
+    } catch(e) {
+        res.render('home.ejs', { destCount: 0, stayCount: 0, expCount: 0 });
+    }
+});
 
 // Mount routes
 app.use("/", listing);

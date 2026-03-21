@@ -72,9 +72,9 @@
                             <div style="overflow:hidden; position:relative;">
                                 <% const expImg = (exp.images && exp.images.length > 0 && exp.images[0].url)
                                     ? exp.images[0].url
-                                    : '/images/default-experience.png'; %>
+                                    : 'image/default-experience.png'; %>
                                 <img src="<%= expImg %>" class="card-img-top" alt="<%= exp.title %>"
-                                     onerror="this.onerror=null; this.src='/images/default-experience.png';">
+                                     onerror="this.onerror=null; this.src='images/default-experience.png';">
                                 <!-- Difficulty badge -->
                                 <span style="position:absolute; top:0.6rem; right:0.6rem; font-size:0.7rem; font-weight:700;
                                     text-transform:uppercase; letter-spacing:0.5px; padding:0.2rem 0.65rem; border-radius:50px;

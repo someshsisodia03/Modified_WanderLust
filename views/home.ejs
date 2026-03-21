@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WanderLust — Discover Your Next Adventure</title>
+    <meta name="description" content="WanderLust — Explore breathtaking destinations, find perfect stays, and book unforgettable experiences around the world.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --brand: #fe424d;
+            --brand-dark: #d9333d;
+            --brand-light: #fff0f1;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* ─── Hero Section ─── */
+        .hero {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            min-height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .hero-bg img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            animation: heroZoom 25s ease-in-out infinite alternate;
+        }
+
+        .hero-bg img.active {
+            opacity: 1;
+        }
+
+        @keyframes heroZoom {
+            0%   { transform: scale(1); }
+            100% { transform: scale(1.08); }
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                180deg,
+                rgba(0,0,0,0.15) 0%,
+                rgba(0,0,0,0.3) 40%,
+                rgba(0,0,0,0.65) 100%
+            );
+            z-index: 1;
+        }
+
+        /* ─── Floating Navbar on Hero ─── */
+        .hero-nav {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            padding: 1.5rem 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 100%);
+        }
+
+        .hero-nav .brand {
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: white;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .hero-nav .brand i {
+            font-size: 1.3rem;
+            color: var(--brand);
+        }
+
+        .hero-nav .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hero-nav .nav-links a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            font-size: 0.92rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            transition: all 0.25s ease;
+        }
+
+        .hero-nav .nav-links a:hover {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+
+        .hero-nav .btn-login {
+            background: var(--brand);
+            color: white !important;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(254,66,77,0.4);
+        }
+
+        .hero-nav .btn-login:hover {
+            background: var(--brand-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(254,66,77,0.5);
+        }
+
+        /* ─── Hero Content ─── */
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+            padding: 2rem;
+            max-width: 800px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.45rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.95);
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.8s ease both;
+        }
+
+        .hero-badge i { color: var(--brand); }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.25rem;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.8s ease 0.15s both;
+        }
+
+        .hero-title .highlight {
+            background: linear-gradient(135deg, var(--brand), #ff8a80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: rgba(255,255,255,0.85);
+            font-weight: 400;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            animation: fadeInUp 0.8s ease 0.3s both;
+        }
+
+        .hero-cta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease 0.45s both;
+        }
+
+        .btn-explore {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: linear-gradient(135deg, var(--brand), #ff6b6b);
+            color: white;
+            text-decoration: none;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(254,66,77,0.45);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-explore::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.2) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .btn-explore:hover::before {
+            transform: translateX(100%);
+        }
+
+        .btn-explore:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(254,66,77,0.55);
+            color: white;
+        }
+
+        .btn-explore i {
+            transition: transform 0.3s ease;
+        }
+
+        .btn-explore:hover i {
+            transform: translateX(4px);
+        }
+
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            text-decoration: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: 2px solid rgba(255,255,255,0.35);
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(6px);
+            transition: all 0.3s ease;
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255,255,255,0.18);
+            border-color: rgba(255,255,255,0.5);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* ─── Statistics Bar ─── */
+        .hero-stats {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            display: flex;
+            gap: 3rem;
+            animation: fadeInUp 0.8s ease 0.6s both;
+        }
+
+        .hero-stat {
+            text-align: center;
+            color: white;
+        }
+
+        .hero-stat .num {
+            font-size: 1.8rem;
+            font-weight: 800;
+            display: block;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .hero-stat .label {
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-divider {
+            width: 1px;
+            background: rgba(255,255,255,0.25);
+            align-self: stretch;
+        }
+
+        /* ─── Scroll Indicator ─── */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 1.2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-8px); }
+            60% { transform: translateX(-50%) translateY(-4px); }
+        }
+
+        /* ─── Featured Section ─── */
+        .featured-section {
+            background: #fafafa;
+            padding: 5rem 2.5rem;
+        }
+
+        .featured-section .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .featured-section .section-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #1a1a2e;
+        }
+
+        .featured-section .section-header p {
+            color: #6b7280;
+            font-size: 1rem;
+            max-width: 500px;
+            margin: 0.5rem auto 0;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid #f0f0f0;
+            transition: all 0.35s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--brand), #ff8a80);
+            transform: scaleX(0);
+            transition: transform 0.35s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+            font-size: 1.6rem;
+        }
+
+        .feature-icon.dest {
+            background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+            color: #00838f;
+        }
+
+        .feature-icon.stays {
+            background: linear-gradient(135deg, #fff0f1, #fecdd3);
+            color: var(--brand);
+        }
+
+        .feature-icon.exp {
+            background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+            color: #7c3aed;
+        }
+
+        .feature-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 0.6rem;
+        }
+
+        .feature-card p {
+            font-size: 0.9rem;
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--brand);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: gap 0.25s ease;
+        }
+
+        .feature-link:hover {
+            gap: 0.7rem;
+            color: var(--brand-dark);
+        }
+
+        /* ─── Home Footer ─── */
+        .home-footer {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #cbd5e1;
+            padding: 2.5rem 1.5rem 1.5rem;
+            text-align: center;
+        }
+
+        .home-footer .brand-name {
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fe424d, #ff7b82);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .home-footer .tagline {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 0.2rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .home-footer .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .home-footer .social-links a {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.25s ease;
+        }
+
+        .home-footer .social-links a:hover {
+            background: linear-gradient(135deg, #fe424d, #ff7b82);
+            border-color: transparent;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(254,66,77,0.4);
+        }
+
+        .home-footer hr {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            margin: 1rem 0;
+        }
+
+        .home-footer .footer-bottom {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .home-footer .footer-bottom a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .home-footer .footer-bottom a:hover {
+            color: #fe424d;
+        }
+
+        /* ─── Animations ─── */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 768px) {
+            .hero-nav { padding: 1rem 1.5rem; }
+            .hero-nav .nav-links a:not(.btn-login) { display: none; }
+            .hero-stats { gap: 1.5rem; }
+            .hero-stat .num { font-size: 1.4rem; }
+            .hero-content { padding: 1rem; }
+            .btn-explore { padding: 0.85rem 2rem; font-size: 1rem; }
+            .featured-section { padding: 3rem 1.25rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ─── Hero Section ─── -->
+    <section class="hero" id="hero">
+        <div class="hero-bg" id="heroBg">
+            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=2400&q=90" alt="Tropical beach" class="active">
+            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2400&q=90" alt="Mountain landscape">
+            <img src="https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=2400&q=90" alt="Santorini Greece">
+            <img src="https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=2400&q=90" alt="Maldives overwater">
+            <img src="https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=2400&q=90" alt="Northern lights">
+        </div>
+        <div class="hero-overlay"></div>
+
+        <!-- Floating Navbar -->
+        <nav class="hero-nav">
+            <a href="/" class="brand">
+                <i class="fa-regular fa-compass"></i> WanderLust
+            </a>
+            <div class="nav-links">
+                <a href="/destinations">Destinations</a>
+                <% if(curruser){ %>
+                    <a href="/listing">Stays</a>
+                    <a href="/experiences">Experiences</a>
+                <% } %>
+                <% if(!curruser){ %>
+                    <a href="/listing/signup">Sign Up</a>
+                    <a href="/listing/login" class="btn-login">
+                        <i class="fa-solid fa-right-to-bracket me-1"></i>Login
+                    </a>
+                <% } else { %>
+                    <a href="/logout" class="btn-login" style="background:rgba(255,255,255,0.15); box-shadow:none;">
+                        <i class="fa-solid fa-right-from-bracket me-1"></i>Logout
+                    </a>
+                <% } %>
+            </div>
+        </nav>
+
+        <!-- Hero Content -->
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fa-solid fa-sparkles"></i> Your Next Adventure Awaits
+            </div>
+            <h1 class="hero-title">
+                Explore the World's<br>
+                Most <span class="highlight">Beautiful</span> Places
+            </h1>
+            <p class="hero-subtitle">
+                Discover stunning destinations, find perfect stays, and book
+                unforgettable experiences — all in one place.
+            </p>
+            <div class="hero-cta">
+                <a href="/destinations" class="btn-explore" id="btn-explore-destinations">
+                    <i class="fa-solid fa-compass"></i>
+                    Explore Destinations
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+                <% if(curruser){ %>
+                    <a href="/listing" class="btn-ghost" id="btn-browse-stays">
+                        <i class="fa-solid fa-bed"></i> Browse Stays
+                    </a>
+                <% } else { %>
+                    <a href="/listing/login" class="btn-ghost" id="btn-get-started">
+                        <i class="fa-solid fa-user-plus"></i> Get Started
+                    </a>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <span class="num" id="stat-destinations"><%= destCount %></span>
+                <span class="label">Destinations</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="hero-stat">
+                <span class="num" id="stat-stays"><%= stayCount %></span>
+                <span class="label">Stays</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="hero-stat">
+                <span class="num" id="stat-experiences"><%= expCount %></span>
+                <span class="label">Experiences</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── Features Section ─── -->
+    <section class="featured-section">
+        <div class="section-header">
+            <h2>Everything You Need to Travel</h2>
+            <p>Plan your perfect trip from start to finish</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon dest">
+                    <i class="fa-solid fa-earth-americas"></i>
+                </div>
+                <h3>Discover Destinations</h3>
+                <p>Browse through handpicked destinations from around the globe. Find hidden gems and iconic landmarks.</p>
+                <a href="/destinations" class="feature-link">
+                    Explore Now <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon stays">
+                    <i class="fa-solid fa-bed"></i>
+                </div>
+                <h3>Book Perfect Stays</h3>
+                <p>From cozy cabins to luxury villas — find your ideal accommodation for every type of adventure.</p>
+                <% if(curruser){ %>
+                    <a href="/listing" class="feature-link">
+                        Find Stays <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                <% } else { %>
+                    <a href="/listing/login" class="feature-link">
+                        Sign in to Browse <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                <% } %>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon exp">
+                    <i class="fa-solid fa-person-hiking"></i>
+                </div>
+                <h3>Live Experiences</h3>
+                <p>Embark on curated experiences — from thrilling treks to serene retreats. Make memories that last.</p>
+                <% if(curruser){ %>
+                    <a href="/experiences" class="feature-link">
+                        View Experiences <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                <% } else { %>
+                    <a href="/listing/login" class="feature-link">
+                        Sign in to Explore <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                <% } %>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── Footer ─── -->
+    <footer class="home-footer">
+        <div class="container">
+            <div class="brand-name"><i class="fa-regular fa-compass"></i> WanderLust</div>
+            <p class="tagline">Discover your next adventure</p>
+            <div class="social-links">
+                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            </div>
+            <hr>
+            <div class="footer-bottom">
+                <span>© 2024 <a href="#">WanderLust.com</a> · <a href="#">Privacy</a> · <a href="#">Terms</a></span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+    <!-- Animate stats counting up -->
+    <script>
+        function animateCount(el, target) {
+            let current = 0;
+            const step = Math.max(1, Math.ceil(target / 40));
+            const interval = setInterval(() => {
+                current += step;
+                if (current >= target) { current = target; clearInterval(interval); }
+                el.textContent = current;
+            }, 35);
+        }
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    document.querySelectorAll('.hero-stat .num').forEach(el => {
+                        animateCount(el, parseInt(el.textContent) || 0);
+                    });
+                    observer.disconnect();
+                }
+            });
+        });
+        observer.observe(document.querySelector('.hero-stats'));
+    </script>
+
+    <!-- Hero slideshow -->
+    <script>
+        (function() {
+            var images = document.querySelectorAll('#heroBg img');
+            var current = 0;
+            var total = images.length;
+            if (total <= 1) return;
+            setInterval(function() {
+                images[current].classList.remove('active');
+                current = (current + 1) % total;
+                images[current].classList.add('active');
+            }, 6000);
+        })();
+    </script>
+</body>
+
+</html>

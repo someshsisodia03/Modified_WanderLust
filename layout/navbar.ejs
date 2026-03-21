@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-md sticky-top border-bottom">
   <div class="container-fluid px-4">
-    <a class="navbar-brand" href="/destinations">
+    <a class="navbar-brand" href="/">
       <i class="fa-regular fa-compass"></i> WanderLust
     </a>
     <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -8,19 +8,24 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
-      <div class="navbar-nav">
-        <a class="nav-link" href="/destinations"><i class="fa-solid fa-compass me-1"></i>Destinations</a>
+      <div class="navbar-nav" id="mainNavLinks" style="position:relative;">
+        <div id="navSlider" style="position:absolute; height:100%; background:var(--brand-light); border-radius:8px; transition: left 0.3s ease, width 0.3s ease; z-index:0; pointer-events:none;"></div>
+        <a class="nav-link" href="/destinations" data-section="destinations" style="position:relative; z-index:1;"><i class="fa-solid fa-compass me-1"></i>Destinations</a>
         <% if(curruser){ %>
-          <a class="nav-link" href="/listing"><i class="fa-solid fa-bed me-1"></i>Stays</a>
-          <a class="nav-link" href="/experiences"><i class="fa-solid fa-person-hiking me-1"></i>Experiences</a>
+          <a class="nav-link" href="/listing" data-section="stays" style="position:relative; z-index:1;"><i class="fa-solid fa-bed me-1"></i>Stays</a>
+          <a class="nav-link" href="/experiences" data-section="experiences" style="position:relative; z-index:1;"><i class="fa-solid fa-person-hiking me-1"></i>Experiences</a>
         <% } %>
       </div>
-      <% if(curruser){ %>
+
+
       <div class="navbar-search-wrap">
-        <form class="search-form" role="search" id="navSearchForm" action="/listing" method="GET">
-          <input class="form-control srch" type="search" name="search" id="navSearchInput"
-            placeholder="Search destinations, cities, categories…" value="<%= locals.searchQuery || '' %>"
-            autocomplete="off">
+        <form class="search-form" role="search" id="navSearchForm" action="/destinations" method="GET">
+          <div class="search-input-wrap">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input class="form-control srch" type="search" name="search" id="navSearchInput"
+              placeholder="Search destinations, countries…" value="<%= locals.searchQuery || '' %>"
+              autocomplete="off">
+          </div>
           <button class="btn btn-search" type="submit">
             <i class="fa-solid fa-magnifying-glass"></i>
             <span class="ms-1">Search</span>
@@ -32,19 +37,85 @@
             var path = window.location.pathname;
             var form = document.getElementById('navSearchForm');
             var input = document.getElementById('navSearchInput');
+
+            // Search context
             if (path.startsWith('/destinations')) {
                 form.action = '/destinations';
                 input.placeholder = 'Search destinations, countries…';
             } else if (path.startsWith('/experiences')) {
                 form.action = '/experiences';
                 input.placeholder = 'Search experiences, activities…';
-            } else {
+            } else if (path.startsWith('/listing') || path.startsWith('/moreabout')) {
                 form.action = '/listing';
                 input.placeholder = 'Search stays, cities, categories…';
+            } else {
+                form.action = '/destinations';
+                input.placeholder = 'Search destinations, countries…';
             }
+
+            // Sliding nav indicator
+            var navWrap = document.getElementById('mainNavLinks');
+            var slider = document.getElementById('navSlider');
+            var links = navWrap.querySelectorAll('.nav-link');
+            var activeLink = null;
+
+            // Find active link
+            links.forEach(function(link) {
+                var section = link.getAttribute('data-section');
+                if (
+                    (section === 'destinations' && path.startsWith('/destinations')) ||
+                    (section === 'stays' && (path.startsWith('/listing') || path.startsWith('/moreabout') || path.startsWith('/addListing'))) ||
+                    (section === 'experiences' && path.startsWith('/experiences'))
+                ) {
+                    activeLink = link;
+                    link.classList.add('nav-active');
+                }
+            });
+
+            function moveSlider(el) {
+                var rect = el.getBoundingClientRect();
+                var parentRect = navWrap.getBoundingClientRect();
+                slider.style.left = (rect.left - parentRect.left) + 'px';
+                slider.style.width = rect.width + 'px';
+            }
+
+            // Position slider on active link initially
+            if (activeLink) {
+                moveSlider(activeLink);
+                slider.style.opacity = '1';
+            } else {
+                slider.style.opacity = '0';
+            }
+
+            // Hover: slide to hovered link
+            links.forEach(function(link) {
+                link.addEventListener('mouseenter', function() {
+                    slider.style.opacity = '1';
+                    moveSlider(link);
+                    // Temporarily style all as inactive, hovered one as active look
+                    links.forEach(function(l) { l.style.color = ''; });
+                    link.style.color = 'var(--brand)';
+                });
+            });
+
+            // Mouse leave nav: slide back to active
+            navWrap.addEventListener('mouseleave', function() {
+                links.forEach(function(l) { l.style.color = ''; });
+                if (activeLink) {
+                    moveSlider(activeLink);
+                } else {
+                    slider.style.opacity = '0';
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (activeLink) moveSlider(activeLink);
+            });
         })();
       </script>
-      <% } %>
+
+
       <div class="navbar-nav ms-auto align-items-center gap-1">
         <% if(curruser){ %>
           <a class="nav-link" href="/addListingDetail"><i class="fa-solid fa-plus me-1"></i>Add</a>
@@ -55,14 +126,14 @@
             style="padding:0.4rem 1.2rem; font-size:0.88rem; text-decoration:none; border-radius:50px;">
             <i class="fa-solid fa-right-to-bracket me-1"></i>Login
           </a>
-          <% } %>
-            <% if(curruser){ %>
-              <span class="nav-link text-muted" style="font-size:0.85rem;">Hi, <%= curruser.username %>!</span>
-              <a href="/logout" class="btn-wl-outline"
-                style="font-size:0.85rem; padding:0.35rem 1rem; text-decoration:none; border-radius:50px;">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout
-              </a>
-              <% } %>
+        <% } %>
+        <% if(curruser){ %>
+          <span class="nav-link text-muted" style="font-size:0.85rem;">Hi, <%= curruser.username %>!</span>
+          <a href="/logout" class="btn-wl-outline"
+            style="font-size:0.85rem; padding:0.35rem 1rem; text-decoration:none; border-radius:50px;">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+          </a>
+        <% } %>
       </div>
     </div>
   </div>
