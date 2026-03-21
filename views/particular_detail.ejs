@@ -57,7 +57,7 @@
                         <a href="/listing/edit/<%=details.id%>" class="btn-wl-outline" style="text-decoration:none;">
                             <i class="fa-solid fa-pen"></i> Edit Listing
                         </a>
-                        <form method="post" action="/deleteDetail/<%=details.id%>?_method=DELETE" style="margin:0;">
+                        <form method="post" action="/deleteDetail/<%=details.id%>?_method=DELETE&from=<%= from %>&destId=<%= destId %>" style="margin:0;">
                             <button class="btn-wl" type="submit"
                                 style="background:linear-gradient(135deg,#dc2626,#ef4444);">
                                 <i class="fa-solid fa-trash"></i> Delete

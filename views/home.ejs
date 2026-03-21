@@ -549,12 +549,25 @@
         @media (max-width: 768px) {
             .hero-nav { padding: 1rem 1.5rem; }
             .hero-nav .nav-links a:not(.btn-login) { display: none; }
-            .hero-stats { gap: 1.5rem; }
+            .hero-stats { gap: 1.5rem; bottom: 2rem; width: 90%; justify-content: center; }
             .hero-stat .num { font-size: 1.4rem; }
+            .hero-stat .label { font-size: 0.72rem; letter-spacing: 0.5px; }
             .hero-content { padding: 1rem; }
             .btn-explore { padding: 0.85rem 2rem; font-size: 1rem; }
+            .btn-ghost { padding: 0.75rem 1.5rem; font-size: 0.9rem; }
             .featured-section { padding: 3rem 1.25rem; }
         }
+
+        @media (max-width: 480px) {
+            .hero-stats { gap: 1rem; bottom: 1.5rem; }
+            .hero-stat .num { font-size: 1.2rem; }
+            .hero-stat .label { font-size: 0.65rem; }
+            .hero-cta { flex-direction: column; gap: 0.75rem; }
+            .btn-explore { width: 100%; justify-content: center; }
+            .btn-ghost { width: 100%; justify-content: center; }
+            .hero-title { font-size: clamp(2rem, 8vw, 3rem); }
+        }
+
     </style>
 </head>
 

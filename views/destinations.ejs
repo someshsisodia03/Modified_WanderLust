@@ -34,7 +34,7 @@
                         <div class="card">
                             <div style="overflow:hidden; position:relative;">
                                 <% const destImg = (dest.images && dest.images.length > 0 && dest.images[0].url)
-                                    ? dest.images[0].url
+                                    ? optimizeImg(dest.images[0].url, 800, 450)
                                     : '/images/aero.png'; %>
                                 <img src="<%= destImg %>" class="card-img-top" alt="<%= dest.name %>">
                                 <% if(!curruser){ %>

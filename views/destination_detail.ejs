@@ -75,7 +75,7 @@
                             <% } else { %>
                                 <div class="cards" style="padding:0;">
                                     <% for(let x of stays) { %>
-                                        <a href="/moreabout/<%= x.id %>" class="cardLink">
+                                        <a href="/moreabout/<%= x.id %>?from=destination&destId=<%= destination._id %>" class="cardLink">
                                             <div class="card">
                                                 <div style="overflow:hidden;">
                                                     <img src="<%= optimizeImg(x.image.url, 800, 450) %>"
@@ -110,37 +110,36 @@
                                 <p>No experiences available in <%= destination.name %> yet. Check back soon!</p>
                             </div>
                             <% } else { %>
-                                <div class="exp-grid">
+                                <div class="cards" style="padding:0;">
                                     <% for(let exp of experiences) { %>
-                                        <a href="/experiences/<%= exp._id %>" class="exp-link">
-                                            <div class="exp-card">
-                                                <div class="exp-img-wrap">
-                                                    <% const expImgUrl=(exp.images && exp.images.length> 0 &&
-                                                        exp.images[0].url) ? exp.images[0].url :
+                                        <a href="/experiences/<%= exp._id %>?from=destination&destId=<%= destination._id %>" class="cardLink">
+                                            <div class="card">
+                                                <div style="overflow:hidden;position:relative;">
+                                                    <% const expImgUrl=(exp.images && exp.images.length > 0 &&
+                                                        exp.images[0].url) ? optimizeImg(exp.images[0].url, 800, 450) :
                                                         '/images/aero.png'; %>
-                                                        <img src="<%= expImgUrl %>" alt="<%= exp.title %>"
-                                                            onerror="this.onerror=null; this.src='/images/aero.png';"
-                                                            style="display:block;width:100%;aspect-ratio:16/9;height:auto;object-fit:cover;object-position:center;transition:transform 0.5s;">
-                                                </div>
-                                                <div class="exp-body">
-                                                    <span
-                                                        class="exp-badge exp-badge-<%= exp.difficulty.toLowerCase() %>">
+                                                    <img src="<%= expImgUrl %>" class="card-img-top" alt="<%= exp.title %>"
+                                                        onerror="this.onerror=null; this.src='/images/aero.png';">
+                                                    <span class="exp-badge exp-badge-<%= exp.difficulty.toLowerCase() %>" style="position:absolute;top:0.75rem;left:0.75rem;z-index:2;">
                                                         <%= exp.difficulty %>
                                                     </span>
-                                                    <div class="exp-title">
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="card-title-text">
                                                         <%= exp.title %>
                                                     </div>
-                                                    <div class="exp-meta">
-                                                        <span><i class="fa-regular fa-clock"></i>
-                                                            <%= exp.duration %>
-                                                        </span>
-                                                        <span>&#8377; <%= exp.price.toLocaleString("en-IN") %>
-                                                                /person</span>
+                                                    <div class="card-location">
+                                                        <i class="fa-regular fa-clock me-1" style="color:var(--brand);font-size:0.75rem;"></i>
+                                                        <%= exp.duration %>
+                                                    </div>
+                                                    <div class="card-price">
+                                                        &#8377; <%= exp.price.toLocaleString("en-IN") %>
+                                                        <span>/person</span>
                                                     </div>
                                                 </div>
                                             </div>
                                         </a>
-                                        <% } %>
+                                    <% } %>
                                 </div>
                                 <% } %>
                     </div>
@@ -169,22 +168,11 @@
             .dd-empty{text-align:center;padding:3rem 2rem;color:var(--muted);background:#f9fafb;border-radius:12px}
             .dd-empty i{display:block;font-size:2rem;color:#d1d5db;margin-bottom:.75rem}
             .dd-empty p{margin:0;font-size:.9rem}
-            .exp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.5rem}
-            .exp-link{text-decoration:none;color:inherit;display:block;border-radius:14px;transition:transform .3s}
-            .exp-link:hover{transform:translateY(-4px)}
-            .exp-card{border-radius:14px;overflow:hidden;background:white;box-shadow:var(--shadow-sm);transition:box-shadow .3s}
-            .exp-link:hover .exp-card{box-shadow:var(--shadow-lg)}
-            .exp-img-wrap{overflow:hidden}
-            .exp-link:hover .exp-img-wrap img{transform:scale(1.06)}
-            .exp-body{padding:.9rem 1.1rem 1rem}
-            .exp-badge{display:inline-block;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:.18rem .6rem;border-radius:50px;margin-bottom:.4rem}
+            .exp-badge{display:inline-block;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:.18rem .6rem;border-radius:50px}
             .exp-badge-easy{background:#ecfdf5;color:#059669}
             .exp-badge-moderate{background:#fff7ed;color:#d97706}
             .exp-badge-challenging{background:#fef2f2;color:#dc2626}
             .exp-badge-extreme{background:#faf5ff;color:#7c3aed}
-            .exp-title{font-weight:700;font-size:.95rem;color:var(--dark);margin-bottom:.35rem}
-            .exp-meta{display:flex;gap:1rem;font-size:.78rem;color:var(--muted)}
-            .exp-meta i{color:var(--brand);margin-right:.2rem;font-size:.68rem}
         </style>
 
         <script>

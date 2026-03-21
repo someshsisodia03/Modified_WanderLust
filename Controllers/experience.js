@@ -52,7 +52,9 @@ module.exports.show = async (req, res) => {
     res.locals.reviewe = req.flash('reviewdeleted');
     res.locals.err     = req.flash('error');
 
-    res.render('experience_detail.ejs', { experience });
+    const from = req.query.from || '';
+    const destId = req.query.destId || '';
+    res.render('experience_detail.ejs', { experience, from, destId });
 };
 
 // POST /experiences/:id/review
@@ -98,5 +100,11 @@ module.exports.destroy = async (req, res) => {
     await Review.deleteMany({ _id: { $in: exp.reviews } });
     await Experience.findByIdAndDelete(req.params.id);
     req.flash('delete', 'Experience deleted!');
-    res.redirect('/experiences');
+    const from = req.query.from;
+    const destId = req.query.destId;
+    if (from === 'destination' && destId) {
+        res.redirect('/destinations/' + destId);
+    } else {
+        res.redirect('/experiences');
+    }
 };

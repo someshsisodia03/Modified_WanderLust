@@ -11,17 +11,9 @@ const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
         folder: 'wanderlust_dev',
-        allowedFormat: ['png','jpeg','jpg'],
-        transformation: [
-            {
-                width: 1600,
-                height: 900,
-                crop: 'fill',
-                gravity: 'auto',
-                quality: 'auto:best',
-                fetch_format: 'auto'
-            }
-        ]
+        allowedFormats: ['png', 'jpeg', 'jpg', 'webp'],
+        // No upload-time transformation — store the original at full quality.
+        // Transformations are applied at display time via optimizeImg() helper.
     },
 });
 

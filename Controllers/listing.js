@@ -100,7 +100,7 @@ module.exports.edit = async (req, res) => {
     }
 
     req.flash("success", "New Listing has been added!");
-    res.redirect("/listing");
+    res.redirect("/destinations");
 }
 
 module.exports.showedit = async (req, res) => {
@@ -150,33 +150,67 @@ module.exports.destroy = async (req, res) => {
         const deletedImage = lst.image;
         const destinationId = lst.destination;
 
+        // Delete the listing's reviews
         await review.deleteMany({ _id: { $in: ids } });
         await lstData.findByIdAndDelete(id);
 
-        // Update the destination's image if needed
+        // Delete corresponding experiences (and their reviews) for this destination by this owner
         if (destinationId) {
+            const relatedExps = await Experience.find({
+                destination: destinationId,
+                owner: req.user._id
+            });
+            for (const exp of relatedExps) {
+                if (exp.reviews && exp.reviews.length > 0) {
+                    await review.deleteMany({ _id: { $in: exp.reviews } });
+                }
+                await Experience.findByIdAndDelete(exp._id);
+            }
+        }
+
+        // Check how many stays are left for this destination
+        let remainingStays = 0;
+        if (destinationId) {
+            remainingStays = await lstData.countDocuments({ destination: destinationId });
+
             const dest = await Destination.findById(destinationId);
             if (dest) {
-                // Check if the destination was using the deleted stay's image
-                const wasUsingDeletedImage = dest.images && dest.images.length > 0 &&
-                    deletedImage && dest.images[0].url === deletedImage.url;
+                if (remainingStays > 0) {
+                    // Refresh the destination image from remaining stays
+                    const wasUsingDeletedImage = dest.images && dest.images.length > 0 &&
+                        deletedImage && dest.images[0].url === deletedImage.url;
 
-                if (wasUsingDeletedImage || !dest.images || dest.images.length === 0) {
-                    // Find another stay to grab the image from
-                    const anotherStay = await lstData.findOne({ destination: destinationId });
-                    if (anotherStay && anotherStay.image && anotherStay.image.url) {
-                        dest.images = [{ url: anotherStay.image.url, filename: anotherStay.image.filename }];
-                    } else {
-                        // No stays left — clear the images
-                        dest.images = [];
+                    if (wasUsingDeletedImage || !dest.images || dest.images.length === 0) {
+                        const anotherStay = await lstData.findOne({ destination: destinationId });
+                        if (anotherStay && anotherStay.image && anotherStay.image.url) {
+                            dest.images = [{ url: anotherStay.image.url, filename: anotherStay.image.filename }];
+                        } else {
+                            dest.images = [];
+                        }
+                        await dest.save();
                     }
+                } else {
+                    // No stays left — clear the destination images
+                    dest.images = [];
                     await dest.save();
                 }
             }
         }
 
-        req.flash("delete", "Listing has been deleted!")
-        res.redirect("/listing");
+        req.flash("delete", "Listing has been deleted!");
+
+        // If no stays left, always redirect to destinations page
+        if (remainingStays === 0) {
+            res.redirect("/destinations");
+        } else {
+            const from = req.query.from;
+            const destId = req.query.destId;
+            if (from === 'destination' && destId) {
+                res.redirect("/destinations/" + destId);
+            } else {
+                res.redirect("/listing");
+            }
+        }
     }
     else {
         req.flash("error", "You are not authorised to do so");
@@ -200,5 +234,7 @@ module.exports.final = async (req, res) => {
     res.locals.err = req.flash("error");
 
     // Geocoding is now done client-side for instant page loads
-    res.render("particular_detail.ejs", { details });
+    const from = req.query.from || '';
+    const destId = req.query.destId || '';
+    res.render("particular_detail.ejs", { details, from, destId });
 }

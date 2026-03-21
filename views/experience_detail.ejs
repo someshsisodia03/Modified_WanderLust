@@ -5,13 +5,14 @@
 
         <!-- Main image -->
         <% const defaultExpImg = '/images/default-experience.png'; %>
-        <% const expDetailImg = (experience.images && experience.images.length > 0 && experience.images[0].url) ? experience.images[0].url : defaultExpImg; %>
+        <% const expDetailImg = (experience.images && experience.images.length > 0 && experience.images[0].url) ? optimizeImg(experience.images[0].url, 1600, 900) : defaultExpImg; %>
         <div style="width:100%; overflow:hidden; border-radius:var(--radius); background:#1e293b; box-shadow:var(--shadow-md);">
             <img src="<%= expDetailImg %>"
                  alt="<%= experience.title %>"
                  onerror="this.onerror=null; this.src='/images/default-experience.png';"
                  style="width:100%; aspect-ratio:16/9; height:auto; object-fit:cover; object-position:center; display:block;">
         </div>
+
 
         <!-- ── Main Info Card ── -->
         <div class="detail-card">
@@ -61,7 +62,7 @@
             <!-- Owner Actions -->
             <% if(curruser && experience.owner && curruser._id.equals(experience.owner._id)){ %>
                 <div class="d-flex gap-2 mt-3 flex-wrap">
-                    <form method="post" action="/experiences/<%= experience._id %>?_method=DELETE" style="margin:0;">
+                    <form method="post" action="/experiences/<%= experience._id %>?_method=DELETE&from=<%= from %>&destId=<%= destId %>" style="margin:0;">
                         <button class="btn-wl" type="submit"
                             style="background:linear-gradient(135deg,#dc2626,#ef4444);">
                             <i class="fa-solid fa-trash"></i> Delete Experience

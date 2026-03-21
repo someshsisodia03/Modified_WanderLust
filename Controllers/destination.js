@@ -25,14 +25,30 @@ module.exports.index = async (req, res) => {
             const stayCount = await lstData.countDocuments({ destination: dest._id });
             const expCount  = await Experience.countDocuments({ destination: dest._id });
 
-            // If destination has no images, grab the first stay's image
+            // Always keep the destination image in sync with actual stays
             let destObj = dest.toObject();
-            if (!destObj.images || destObj.images.length === 0) {
-                const firstStay = await lstData.findOne({ destination: dest._id });
-                if (firstStay && firstStay.image && firstStay.image.url) {
-                    dest.images = [{ url: firstStay.image.url, filename: firstStay.image.filename }];
+            const allStays = await lstData.find({ destination: dest._id }).select('image').lean();
+
+            if (allStays.length > 0) {
+                // Check if the current destination image matches any stay's image
+                const currentDestImg = (destObj.images && destObj.images.length > 0) ? destObj.images[0].url : null;
+                const stayHasThisImg = currentDestImg && allStays.some(s => s.image && s.image.url === currentDestImg);
+
+                if (!stayHasThisImg) {
+                    // Current image is stale/missing — pick the first stay's image
+                    const validStay = allStays.find(s => s.image && s.image.url);
+                    if (validStay) {
+                        dest.images = [{ url: validStay.image.url, filename: validStay.image.filename }];
+                        await dest.save();
+                        destObj.images = dest.images;
+                    }
+                }
+            } else {
+                // No stays left — clear images
+                if (destObj.images && destObj.images.length > 0) {
+                    dest.images = [];
                     await dest.save();
-                    destObj.images = dest.images;
+                    destObj.images = [];
                 }
             }
 

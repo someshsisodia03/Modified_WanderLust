@@ -2,6 +2,9 @@
 
     <body>
         <!-- Category Filters -->
+        <div class="filters-wrap">
+        <button class="filter-arrow filter-arrow-left hidden" aria-label="Scroll left"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="filter-arrow filter-arrow-right" aria-label="Scroll right"><i class="fa-solid fa-chevron-right"></i></button>
         <div class="filters">
             <div class="filter <% if(catg==='Trending') { %>active<% } %>">
                 <a href="/listing/show/Trending"><i class="fa-solid fa-fire"></i>
@@ -52,6 +55,7 @@
                 <i class="fa-solid fa-arrow-left" style="color:var(--brand);"></i> All listings
             </a>
         </div>
+        </div>
 
         <!-- Filtered Cards -->
         <% let filtered=listdata.filter(x=> x.category === catg);
@@ -66,10 +70,10 @@
                 <% } else { %>
                     <div class="cards">
                         <% for (let x of filtered) { %>
-                            <a href="/moreabout/<%=x.id%>" class="cardLink">
+                            <a href="/moreabout/<%=x.id%>?from=stays" class="cardLink">
                                 <div class="card">
                                     <div style="overflow:hidden;">
-                                        <img src="<%=x.image.url%>" class="card-img-top" alt="<%=x.title%>">
+                                        <img src="<%=optimizeImg(x.image.url, 800, 450)%>" class="card-img-top" alt="<%=x.title%>">
                                     </div>
                                     <div class="card-body">
                                         <div class="card-title-text">

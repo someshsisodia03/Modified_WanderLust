@@ -61,9 +61,15 @@ passport.use(new LocalStrategy(user.authenticate()));
 passport.serializeUser(user.serializeUser());
 passport.deserializeUser(user.deserializeUser());
 
-// Global middleware — current user + image optimizer
+// Global middleware — current user + image optimizer + no-cache
 app.use((req, res, next) => {
     res.locals.curruser = req.user;
+
+    // Prevent browser from caching pages (fixes back-button showing deleted items)
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+
     // Helper to optimize Cloudinary images on-the-fly (16:9 aspect ratio)
     res.locals.optimizeImg = function(url, width, height) {
         if (!url) return url;
@@ -76,6 +82,7 @@ app.use((req, res, next) => {
     };
     next();
 })
+
 
 // Homepage — stunning landing page
 const Destination = require('./Models/destinationModel.js');

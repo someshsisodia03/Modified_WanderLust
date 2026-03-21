@@ -85,6 +85,30 @@
             font-weight: 600 !important;
         }
 
+        /* ── Mobile nav dropdown styles ── */
+        @media (max-width: 991.98px) {
+            #navSlider {
+                display: none !important;
+            }
+
+            #mainNavLinks .nav-link {
+                padding: 0.65rem 0.75rem !important;
+                border-radius: 8px;
+                background: transparent !important;
+            }
+
+            #mainNavLinks .nav-link:hover {
+                color: var(--brand) !important;
+            }
+
+            #mainNavLinks .nav-link.nav-active {
+                color: var(--brand) !important;
+                font-weight: 700 !important;
+                background: transparent !important;
+            }
+        }
+
+
         .btn-search {
             background: linear-gradient(135deg, var(--brand), #ff6b6b);
             color: white;
@@ -204,7 +228,7 @@
             padding-left: 2.5rem;
         }
 
-        @media (max-width: 991px) {
+        @media (max-width: 991.98px) {
             .navbar-search-wrap {
                 padding: 0.5rem 0;
                 order: 3;
@@ -300,15 +324,70 @@
         }
 
         /* â”€â”€â”€ Category Filters â”€â”€â”€ */
+        .filters-wrap {
+            position: relative;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        /* Arrow buttons */
+        .filter-arrow {
+            display: none;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 3;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border);
+            background: white;
+            color: var(--text);
+            font-size: 0.8rem;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+
+        .filter-arrow:hover {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+            box-shadow: 0 4px 12px rgba(254,66,77,0.3);
+        }
+
+        .filter-arrow-left { left: 4px; }
+        .filter-arrow-right { right: 4px; }
+
+        .filter-arrow.hidden { opacity: 0; pointer-events: none; }
+
+        @media (max-width: 991.98px) {
+            .filter-arrow {
+                display: flex;
+            }
+        }
+
         .filters {
             display: flex;
             flex-wrap: nowrap;
             overflow-x: auto;
             gap: 0.25rem;
             padding: 1rem 1.5rem 0.5rem;
-            border-bottom: 1px solid var(--border);
             background: white;
             scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+
+        @media (max-width: 991.98px) {
+            .filters {
+                padding: 1rem 40px 0.5rem;
+                -webkit-mask-image: linear-gradient(to right, transparent 0px, black 42px, black calc(100% - 42px), transparent 100%);
+                mask-image: linear-gradient(to right, transparent 0px, black 42px, black calc(100% - 42px), transparent 100%);
+            }
         }
 
         .filters::-webkit-scrollbar {
@@ -377,6 +456,12 @@
 
         .tax-info {
             display: none;
+        }
+
+        @media (max-width: 991.98px) {
+            .tax-box {
+                display: none !important;
+            }
         }
 
         /* â”€â”€â”€ Listing Cards â”€â”€â”€ */
@@ -921,6 +1006,38 @@
                     (() => { 'use strict'; document.querySelectorAll('.needs-validation').forEach(f => { f.addEventListener('submit', e => { if (!f.checkValidity()) { e.preventDefault(); e.stopPropagation() } f.classList.add('was-validated') }, false) }) })();
                     document.querySelectorAll('.flash-toast .btn-close').forEach(b => { b.addEventListener('click', () => { const t = b.closest('.flash-toast'); if (t) { t.style.opacity = '0'; t.style.transform = 'translateX(30px)'; t.style.transition = 'all .25s'; setTimeout(() => t.remove(), 260) } }) });
                     document.querySelectorAll('.flash-toast').forEach(t => { setTimeout(() => { if (document.body.contains(t)) { t.style.opacity = '0'; t.style.transition = 'all .35s'; setTimeout(() => t.remove(), 360) } }, 5000) });
+
+                    // Filter arrow scroll
+                    document.querySelectorAll('.filters-wrap').forEach(wrap => {
+                        const scroller = wrap.querySelector('.filters');
+                        const leftBtn = wrap.querySelector('.filter-arrow-left');
+                        const rightBtn = wrap.querySelector('.filter-arrow-right');
+                        if (!scroller || !leftBtn || !rightBtn) return;
+
+                        function updateArrows() {
+                            const sl = scroller.scrollLeft;
+                            const maxScroll = scroller.scrollWidth - scroller.clientWidth;
+                            if (maxScroll <= 5) {
+                                leftBtn.classList.add('hidden');
+                                rightBtn.classList.add('hidden');
+                                return;
+                            }
+                            if (sl <= 5) leftBtn.classList.add('hidden');
+                            else leftBtn.classList.remove('hidden');
+                            if (sl >= maxScroll - 5) rightBtn.classList.add('hidden');
+                            else rightBtn.classList.remove('hidden');
+                        }
+
+                        leftBtn.addEventListener('click', () => {
+                            scroller.scrollBy({ left: -200, behavior: 'smooth' });
+                        });
+                        rightBtn.addEventListener('click', () => {
+                            scroller.scrollBy({ left: 200, behavior: 'smooth' });
+                        });
+
+                        scroller.addEventListener('scroll', updateArrows, { passive: true });
+                        updateArrows();
+                    });
                 </script>
 </body>
 

@@ -2,6 +2,9 @@
 
     <body>
         <!-- Category Filters -->
+        <div class="filters-wrap">
+        <button class="filter-arrow filter-arrow-left hidden" aria-label="Scroll left"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="filter-arrow filter-arrow-right" aria-label="Scroll right"><i class="fa-solid fa-chevron-right"></i></button>
         <div class="filters">
             <div class="filter <% if(activeCategory==='Trending') { %>active<% } %>">
                 <a href="/experiences/filter/Trending"><i class="fa-solid fa-fire"></i><p class="icon-text">Trending</p></a>
@@ -34,6 +37,8 @@
                 <i class="fa-solid fa-arrow-left" style="color:var(--brand);"></i> All experiences
             </a>
         </div>
+        </div>
+
 
         <!-- Search Results Banner -->
         <% if(typeof searchQuery !== 'undefined' && searchQuery && searchQuery.length > 0){ %>
@@ -67,12 +72,12 @@
         <% } else { %>
             <div class="cards">
                 <% for(let exp of experiences) { %>
-                    <a href="/experiences/<%= exp._id %>" class="cardLink">
+                    <a href="/experiences/<%= exp._id %>?from=experiences" class="cardLink">
                         <div class="card">
                             <div style="overflow:hidden; position:relative;">
                                 <% const expImg = (exp.images && exp.images.length > 0 && exp.images[0].url)
-                                    ? exp.images[0].url
-                                    : 'image/default-experience.png'; %>
+                                    ? optimizeImg(exp.images[0].url, 800, 450)
+                                    : '/images/default-experience.png'; %>
                                 <img src="<%= expImg %>" class="card-img-top" alt="<%= exp.title %>"
                                      onerror="this.onerror=null; this.src='images/default-experience.png';">
                                 <!-- Difficulty badge -->
