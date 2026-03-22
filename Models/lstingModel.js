@@ -28,7 +28,8 @@ const listingSchema = new mongoose.Schema({
     destination: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Destination"
-    }
+    },
+    embedding: { type: [Number], default: [], select: false }
 }, { timestamps: true });
 const lstDatas = mongoose.model("lstData", listingSchema);
 module.exports = lstDatas;

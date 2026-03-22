@@ -5,6 +5,7 @@ const destinationSchema = new mongoose.Schema({
     country: { type: String, required: true, trim: true },
     description: { type: String, default: '' },
     images: [{ url: String, filename: String }],
+    embedding: { type: [Number], default: [], select: false },
     createdAt: { type: Date, default: Date.now }
 });
 

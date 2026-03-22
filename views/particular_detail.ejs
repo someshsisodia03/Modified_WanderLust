@@ -165,7 +165,39 @@
                                 </div>
                             </div>
 
-        </div>
+
+                            <!-- ── Similar Places You'll Love ── -->
+                            <div class="detail-card mt-3" id="rec-section" style="display:none;">
+                                <div class="section-title">
+                                    <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--brand);"></i>
+                                    Similar Places You'll Love
+                                    <span style="font-size:0.7rem; font-weight:500; color:var(--muted); margin-left:0.5rem; background:#f3f4f6; padding:0.15rem 0.6rem; border-radius:50px;">
+                                        <i class="fa-solid fa-microchip me-1"></i>AI Powered
+                                    </span>
+                                </div>
+                                <div id="rec-loading" style="display:flex; gap:1rem; overflow:hidden;">
+                                    <div style="flex:1; min-width:200px; height:180px; border-radius:14px; background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:recShimmer 1.5s ease-in-out infinite;"></div>
+                                    <div style="flex:1; min-width:200px; height:180px; border-radius:14px; background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:recShimmer 1.5s ease-in-out infinite; animation-delay:0.2s;"></div>
+                                    <div style="flex:1; min-width:200px; height:180px; border-radius:14px; background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:recShimmer 1.5s ease-in-out infinite; animation-delay:0.4s;"></div>
+                                </div>
+                                <div id="rec-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:1rem;"></div>
+                            </div>
+
+                            <style>
+                                @keyframes recShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+                                .rec-card { border-radius:14px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.07); transition:all 0.3s ease; text-decoration:none; color:inherit; display:block; background:white; border:1px solid #f0f0f0; }
+                                .rec-card:hover { transform:translateY(-4px); box-shadow:0 8px 28px rgba(0,0,0,0.12); }
+                                .rec-card img { width:100%; aspect-ratio:16/10; object-fit:cover; display:block; }
+                                .rec-card-body { padding:0.75rem 0.85rem 0.85rem; }
+                                .rec-card-title { font-weight:700; font-size:0.88rem; color:#1a1a2e; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+                                .rec-card-loc { font-size:0.78rem; color:#6b7280; margin-top:0.1rem; }
+                                .rec-card-bottom { display:flex; justify-content:space-between; align-items:center; margin-top:0.35rem; }
+                                .rec-card-price { font-weight:700; font-size:0.85rem; color:#374151; }
+                                .rec-card-price span { font-weight:400; color:#9ca3af; font-size:0.75rem; }
+                                .rec-card-score { font-size:0.65rem; font-weight:600; color:#059669; background:#ecfdf5; padding:0.1rem 0.45rem; border-radius:50px; }
+                            </style>
+
+        </div><!-- end detail-wrapper -->
 
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -226,6 +258,61 @@
                         clearTimeout(timer);
                         loadingEl.style.display = 'none';
                         errorEl.style.display = 'block';
+                    });
+            })();
+        </script>
+
+        <!-- ── Recommendations Script ── -->
+        <script>
+            (function() {
+                var listingId = '<%= details.id %>';
+                var section = document.getElementById('rec-section');
+                var loading = document.getElementById('rec-loading');
+                var grid = document.getElementById('rec-grid');
+
+                fetch('/api/recommendations/listing/' + listingId)
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        section.style.display = 'block';
+                        loading.style.display = 'none';
+
+                        if (!data.recommendations || data.recommendations.length === 0) {
+                            grid.innerHTML = '<div style="text-align:center; padding:2rem 1rem; color:#9ca3af;">' +
+                                '<i class="fa-solid fa-compass" style="font-size:2rem; margin-bottom:0.75rem; display:block; color:#d1d5db;"></i>' +
+                                '<p style="font-size:0.95rem; font-weight:600; color:#6b7280; margin:0;">No similar places found</p>' +
+                                '<p style="font-size:0.8rem; margin:0.25rem 0 0;">This place is unique! We couldn\'t find close matches above 75% similarity.</p>' +
+                                '</div>';
+                            return;
+                        }
+
+                        data.recommendations.forEach(function(rec) {
+                            var imgUrl = rec.image && rec.image.url ? rec.image.url : '';
+                            if (imgUrl && imgUrl.includes('res.cloudinary.com') && imgUrl.includes('/upload/')) {
+                                imgUrl = imgUrl.replace('/upload/', '/upload/w_500,h_320,c_fill,g_auto,q_auto:best,f_auto/');
+                            }
+                            var price = Number(rec.price).toLocaleString('en-IN');
+                            var card = document.createElement('a');
+                            card.href = '/moreabout/' + rec._id + '?from=stays';
+                            card.className = 'rec-card';
+                            card.innerHTML = '<img src="' + imgUrl + '" alt="' + rec.title + '">' +
+                                '<div class="rec-card-body">' +
+                                    '<div class="rec-card-title">' + rec.title + '</div>' +
+                                    '<div class="rec-card-loc"><i class="fa-solid fa-location-dot me-1" style="color:#fe424d;font-size:0.65rem;"></i>' + rec.location + ', ' + rec.country + '</div>' +
+                                    '<div class="rec-card-bottom">' +
+                                        '<div class="rec-card-price">&#8377; ' + price + ' <span>/night</span></div>' +
+                                        '<span class="rec-card-score">' + rec.similarityScore + '% match</span>' +
+                                    '</div>' +
+                                '</div>';
+                            grid.appendChild(card);
+                        });
+                    })
+                    .catch(function(err) {
+                        section.style.display = 'block';
+                        loading.style.display = 'none';
+                        grid.innerHTML = '<div style="text-align:center; padding:2rem 1rem; color:#9ca3af;">' +
+                            '<i class="fa-solid fa-compass" style="font-size:2rem; margin-bottom:0.75rem; display:block; color:#d1d5db;"></i>' +
+                            '<p style="font-size:0.95rem; font-weight:600; color:#6b7280; margin:0;">No similar places found</p>' +
+                            '</div>';
                     });
             })();
         </script>

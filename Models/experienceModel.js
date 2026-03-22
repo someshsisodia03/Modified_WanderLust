@@ -30,6 +30,7 @@ const experienceSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user'
     },
+    embedding: { type: [Number], default: [], select: false },
     createdAt: { type: Date, default: Date.now }
 });
 

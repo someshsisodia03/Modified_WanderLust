@@ -25,6 +25,7 @@ let reviewe = require("./Routes/review.js");
 let signLogin = require("./Routes/usersignupLogin.js")
 let destinationRoutes = require("./Routes/destination.js");
 let experienceRoutes = require("./Routes/experience.js");
+let recommendationRoutes = require("./Routes/recommendation.js");
 
 // MongoDB connection
 async function main() {
@@ -106,6 +107,7 @@ app.use("/", reviewe);
 app.use("/", signLogin);
 app.use("/", destinationRoutes);
 app.use("/", experienceRoutes);
+app.use("/", recommendationRoutes);
 
 // 404 handler
 app.all("*", (req, res, next) => {

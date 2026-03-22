@@ -2,6 +2,7 @@ let lstData = require("../Models/lstingModel.js")
 let review = require("../Models/reviewModel.js");
 const Experience = require("../Models/experienceModel.js");
 const Destination = require("../Models/destinationModel.js");
+const { getEmbedding, buildListingText } = require('../utils/embeddings');
 
 const LISTING_PER_PAGE = 12;
 module.exports.showlisting = async (req, res) => {
@@ -91,6 +92,13 @@ module.exports.edit = async (req, res) => {
     newplace.owner = req.user._id;
     await newplace.save();
 
+    // Auto-generate embedding for recommendation engine (non-blocking)
+    getEmbedding(buildListingText(newplace)).then(emb => {
+        if (emb.length > 0) {
+            lstData.updateOne({ _id: newplace._id }, { $set: { embedding: emb } }).exec();
+        }
+    }).catch(err => console.log('Auto-embed failed:', err.message));
+
     // Optionally create an Experience linked to the same destination
     if (addExperience === 'yes' && expTitle && expTitle.trim()) {
         // Use separate experience image if uploaded, otherwise fall back to listing image
@@ -150,6 +158,16 @@ module.exports.update = async (req, res) => {
         { _id: req.params.id },
         { $set: updateFields }
     );
+
+    // Re-generate embedding after update (non-blocking)
+    const updatedListing = await lstData.findById(req.params.id);
+    if (updatedListing) {
+        getEmbedding(buildListingText(updatedListing)).then(emb => {
+            if (emb.length > 0) {
+                lstData.updateOne({ _id: req.params.id }, { $set: { embedding: emb } }).exec();
+            }
+        }).catch(err => console.log('Re-embed failed:', err.message));
+    }
 
     req.flash("update", "Listing has been updated!");
     res.redirect("/listing");
