@@ -24,11 +24,11 @@
                 <div class="dd-hero-pills">
                     <span class="dd-pill">
                         <i class="fa-solid fa-bed"></i>
-                        <%= stays.length %> Stay<%= stays.length !==1 ? 's' : '' %>
+                        <%= totalStays %> Stay<%= totalStays !==1 ? 's' : '' %>
                     </span>
                     <span class="dd-pill">
                         <i class="fa-solid fa-person-hiking"></i>
-                        <%= experiences.length %> Experience<%= experiences.length !==1 ? 's' : '' %>
+                        <%= totalExperiences %> Experience<%= totalExperiences !==1 ? 's' : '' %>
                     </span>
                 </div>
             </div>
@@ -54,28 +54,28 @@
                         <button class="dd-tab active" id="tab-stays" onclick="switchTab('stays')">
                             <i class="fa-solid fa-bed"></i> Stays
                             <span class="dd-tab-count">
-                                <%= stays.length %>
+                                <%= totalStays %>
                             </span>
                         </button>
                         <button class="dd-tab" id="tab-exp" onclick="switchTab('exp')">
                             <i class="fa-solid fa-person-hiking"></i> Experiences
                             <span class="dd-tab-count">
-                                <%= experiences.length %>
+                                <%= totalExperiences %>
                             </span>
                         </button>
                     </div>
 
                     <!-- ══ STAYS PANEL ══ -->
                     <div id="panel-stays">
-                        <% if(stays.length===0) { %>
+                        <% if(totalStays===0) { %>
                             <div class="dd-empty">
                                 <i class="fa-solid fa-house"></i>
                                 <p>No stays available in <%= destination.name %> yet.</p>
                             </div>
                             <% } else { %>
-                                <div class="cards" style="padding:0;">
+                                <div class="cards" id="stays-grid" style="padding:0;">
                                     <% for(let x of stays) { %>
-                                        <a href="/moreabout/<%= x.id %>?from=destination&destId=<%= destination._id %>" class="cardLink">
+                                        <a href="/moreabout/<%= x.id %>?from=destination&destId=<%= destination._id %>" class="cardLink dd-card-animated">
                                             <div class="card">
                                                 <div style="overflow:hidden;">
                                                     <img src="<%= optimizeImg(x.image.url, 800, 450) %>"
@@ -99,27 +99,38 @@
                                         </a>
                                         <% } %>
                                 </div>
+
+                                <!-- Load More Button for Stays -->
+                                <% if(totalStays > perPage) { %>
+                                    <div class="dd-load-more-wrap" id="stays-load-more-wrap">
+                                        <button class="dd-load-more-btn" id="stays-load-more" onclick="loadMore('stays')">
+                                            <i class="fa-solid fa-chevron-down"></i>
+                                            Load More Stays
+                                            <span class="dd-load-count">(<%= stays.length %> of <%= totalStays %>)</span>
+                                        </button>
+                                    </div>
+                                <% } %>
                                 <% } %>
                     </div>
 
                     <!-- ══ EXPERIENCES PANEL ══ -->
                     <div id="panel-exp" style="display:none;">
-                        <% if(experiences.length===0) { %>
+                        <% if(totalExperiences===0) { %>
                             <div class="dd-empty">
                                 <i class="fa-solid fa-mountain-sun"></i>
                                 <p>No experiences available in <%= destination.name %> yet. Check back soon!</p>
                             </div>
                             <% } else { %>
-                                <div class="cards" style="padding:0;">
+                                <div class="cards" id="exp-grid" style="padding:0;">
                                     <% for(let exp of experiences) { %>
-                                        <a href="/experiences/<%= exp._id %>?from=destination&destId=<%= destination._id %>" class="cardLink">
+                                        <a href="/experiences/<%= exp._id %>?from=destination&destId=<%= destination._id %>" class="cardLink dd-card-animated">
                                             <div class="card">
                                                 <div style="overflow:hidden;position:relative;">
                                                     <% const expImgUrl=(exp.images && exp.images.length > 0 &&
                                                         exp.images[0].url) ? optimizeImg(exp.images[0].url, 800, 450) :
-                                                        '/images/aero.png'; %>
+                                                        '/images/default-experience.png'; %>
                                                     <img src="<%= expImgUrl %>" class="card-img-top" alt="<%= exp.title %>"
-                                                        onerror="this.onerror=null; this.src='/images/aero.png';">
+                                                        onerror="this.onerror=null; this.src='/images/default-experience.png';">
                                                     <span class="exp-badge exp-badge-<%= exp.difficulty.toLowerCase() %>" style="position:absolute;top:0.75rem;left:0.75rem;z-index:2;">
                                                         <%= exp.difficulty %>
                                                     </span>
@@ -141,6 +152,17 @@
                                         </a>
                                     <% } %>
                                 </div>
+
+                                <!-- Load More Button for Experiences -->
+                                <% if(totalExperiences > perPage) { %>
+                                    <div class="dd-load-more-wrap" id="exp-load-more-wrap">
+                                        <button class="dd-load-more-btn" id="exp-load-more" onclick="loadMore('experiences')">
+                                            <i class="fa-solid fa-chevron-down"></i>
+                                            Load More Experiences
+                                            <span class="dd-load-count">(<%= experiences.length %> of <%= totalExperiences %>)</span>
+                                        </button>
+                                    </div>
+                                <% } %>
                                 <% } %>
                     </div>
 
@@ -173,6 +195,104 @@
             .exp-badge-moderate{background:#fff7ed;color:#d97706}
             .exp-badge-challenging{background:#fef2f2;color:#dc2626}
             .exp-badge-extreme{background:#faf5ff;color:#7c3aed}
+
+            /* ═══ Card Entrance Animation ═══ */
+            .dd-card-animated {
+                opacity: 0;
+                transform: translateY(24px);
+                animation: ddCardFadeIn 0.5s ease forwards;
+            }
+            .dd-card-animated:nth-child(1) { animation-delay: 0.05s; }
+            .dd-card-animated:nth-child(2) { animation-delay: 0.1s; }
+            .dd-card-animated:nth-child(3) { animation-delay: 0.15s; }
+            .dd-card-animated:nth-child(4) { animation-delay: 0.2s; }
+            .dd-card-animated:nth-child(5) { animation-delay: 0.25s; }
+            .dd-card-animated:nth-child(6) { animation-delay: 0.3s; }
+
+            @keyframes ddCardFadeIn {
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            /* ═══ Skeleton Loading ═══ */
+            .dd-skeleton-card {
+                border-radius: 16px;
+                overflow: hidden;
+                background: white;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+                border: 1px solid #f0f0f0;
+            }
+            .dd-skeleton-img {
+                width: 100%;
+                height: 200px;
+                background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+                background-size: 200% 100%;
+                animation: ddShimmer 1.5s ease-in-out infinite;
+            }
+            .dd-skeleton-body { padding: 1rem; }
+            .dd-skeleton-line {
+                height: 14px;
+                border-radius: 6px;
+                background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+                background-size: 200% 100%;
+                animation: ddShimmer 1.5s ease-in-out infinite;
+                margin-bottom: 0.6rem;
+            }
+            .dd-skeleton-line.w75 { width: 75%; }
+            .dd-skeleton-line.w50 { width: 50%; }
+            .dd-skeleton-line.w30 { width: 30%; }
+            @keyframes ddShimmer {
+                0% { background-position: 200% 0; }
+                100% { background-position: -200% 0; }
+            }
+
+            /* ═══ Load More Button ═══ */
+            .dd-load-more-wrap {
+                text-align: center;
+                margin: 2rem 0 1rem;
+            }
+            .dd-load-more-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.75rem 2rem;
+                border: 2px solid var(--border);
+                border-radius: 50px;
+                background: white;
+                color: var(--dark);
+                font-family: 'Inter', sans-serif;
+                font-size: 0.9rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            .dd-load-more-btn:hover {
+                border-color: var(--brand);
+                color: var(--brand);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(254,66,77,0.15);
+            }
+            .dd-load-more-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                transform: none;
+            }
+            .dd-load-more-btn i {
+                transition: transform 0.3s ease;
+            }
+            .dd-load-more-btn:hover i {
+                transform: translateY(3px);
+            }
+            .dd-load-count {
+                font-size: 0.78rem;
+                color: var(--muted);
+                font-weight: 500;
+            }
+            .dd-load-more-btn.loading i {
+                animation: ddSpin 0.8s linear infinite;
+            }
+            @keyframes ddSpin {
+                to { transform: rotate(360deg); }
+            }
         </style>
 
         <script>
@@ -181,6 +301,170 @@
                 document.getElementById('panel-exp').style.display = tab === 'exp' ? 'block' : 'none';
                 document.getElementById('tab-stays').classList.toggle('active', tab === 'stays');
                 document.getElementById('tab-exp').classList.toggle('active', tab === 'exp');
+            }
+
+            // ═══ Pagination State ═══
+            const destId = '<%= destination._id %>';
+            const perPage = <%= perPage %>;
+            const paginationState = {
+                stays: { page: 1, total: <%= totalStays %>, loading: false },
+                experiences: { page: 1, total: <%= totalExperiences %>, loading: false }
+            };
+
+            // ═══ Skeleton HTML generators ═══
+            function createSkeleton() {
+                return `<div class="dd-skeleton-card">
+                    <div class="dd-skeleton-img"></div>
+                    <div class="dd-skeleton-body">
+                        <div class="dd-skeleton-line w75"></div>
+                        <div class="dd-skeleton-line w50"></div>
+                        <div class="dd-skeleton-line w30"></div>
+                    </div>
+                </div>`;
+            }
+
+            function showSkeletons(gridId, count) {
+                const grid = document.getElementById(gridId);
+                const wrapper = document.createElement('div');
+                wrapper.className = 'dd-skeletons-temp';
+                wrapper.style.display = 'contents';
+                for (let i = 0; i < count; i++) {
+                    const el = document.createElement('div');
+                    el.innerHTML = createSkeleton();
+                    el.style.display = 'contents';
+                    wrapper.appendChild(el);
+                }
+                grid.appendChild(wrapper);
+                return wrapper;
+            }
+
+            function removeSkeletons(wrapper) {
+                if (wrapper && wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+            }
+
+            // ═══ Optimise Cloudinary image URL ═══
+            function optimizeImgUrl(url, w, h) {
+                w = w || 800; h = h || 450;
+                if (!url) return url;
+                if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+                    return url.replace('/upload/', '/upload/w_' + w + ',h_' + h + ',c_fill,g_auto,q_auto:best,f_auto/');
+                }
+                return url;
+            }
+
+            // ═══ Build card HTML ═══
+            function buildStayCard(item) {
+                const imgUrl = item.image && item.image.url ? optimizeImgUrl(item.image.url) : '';
+                const price = Number(item.price).toLocaleString('en-IN');
+                return `<a href="/moreabout/${item._id}?from=destination&destId=${destId}" class="cardLink dd-card-animated" style="animation-delay:0s;">
+                    <div class="card">
+                        <div style="overflow:hidden;">
+                            <img src="${imgUrl}" class="card-img-top" alt="${item.title}">
+                        </div>
+                        <div class="card-body">
+                            <div class="card-title-text">${item.title}</div>
+                            <div class="card-location">
+                                <i class="fa-solid fa-location-dot me-1" style="color:var(--brand);font-size:0.75rem;"></i>
+                                ${item.location}, ${item.country}
+                            </div>
+                            <div class="card-price">&#8377; ${price}<span>/night</span></div>
+                        </div>
+                    </div>
+                </a>`;
+            }
+
+            function buildExpCard(item) {
+                const imgUrl = (item.images && item.images.length > 0 && item.images[0].url)
+                    ? optimizeImgUrl(item.images[0].url) : '/images/default-experience.png';
+                const price = Number(item.price).toLocaleString('en-IN');
+                const diff = (item.difficulty || 'Easy').toLowerCase();
+                return `<a href="/experiences/${item._id}?from=destination&destId=${destId}" class="cardLink dd-card-animated" style="animation-delay:0s;">
+                    <div class="card">
+                        <div style="overflow:hidden;position:relative;">
+                            <img src="${imgUrl}" class="card-img-top" alt="${item.title}"
+                                onerror="this.onerror=null; this.src='/images/default-experience.png';">
+                            <span class="exp-badge exp-badge-${diff}" style="position:absolute;top:0.75rem;left:0.75rem;z-index:2;">
+                                ${item.difficulty || 'Easy'}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-title-text">${item.title}</div>
+                            <div class="card-location">
+                                <i class="fa-regular fa-clock me-1" style="color:var(--brand);font-size:0.75rem;"></i>
+                                ${item.duration}
+                            </div>
+                            <div class="card-price">&#8377; ${price}<span>/person</span></div>
+                        </div>
+                    </div>
+                </a>`;
+            }
+
+            // ═══ Load More Handler ═══
+            async function loadMore(type) {
+                const state = paginationState[type];
+                if (state.loading) return;
+                state.loading = true;
+
+                const gridId = type === 'stays' ? 'stays-grid' : 'exp-grid';
+                const btnId = type === 'stays' ? 'stays-load-more' : 'exp-load-more';
+                const wrapId = type === 'stays' ? 'stays-load-more-wrap' : 'exp-load-more-wrap';
+                const btn = document.getElementById(btnId);
+
+                // Show loading state on button
+                btn.classList.add('loading');
+                btn.querySelector('i').className = 'fa-solid fa-spinner';
+                btn.disabled = true;
+
+                // Show skeleton cards
+                const skeletonCount = Math.min(perPage, state.total - (state.page * perPage));
+                const skeletonWrapper = showSkeletons(gridId, Math.max(skeletonCount, 1));
+
+                // Simulate slight delay for visual feedback
+                await new Promise(r => setTimeout(r, 600));
+
+                try {
+                    const nextPage = state.page + 1;
+                    const res = await fetch(`/destinations/${destId}/api?type=${type}&page=${nextPage}`);
+                    const data = await res.json();
+
+                    // Remove skeletons
+                    removeSkeletons(skeletonWrapper);
+
+                    // Append real cards with stagger animation
+                    const grid = document.getElementById(gridId);
+                    data.items.forEach((item, i) => {
+                        const html = type === 'stays' ? buildStayCard(item) : buildExpCard(item);
+                        const temp = document.createElement('div');
+                        temp.innerHTML = html;
+                        const card = temp.firstElementChild;
+                        card.style.animationDelay = (i * 0.08) + 's';
+                        grid.appendChild(card);
+                    });
+
+                    state.page = nextPage;
+                    const loaded = state.page * perPage;
+
+                    // Update button text
+                    const countShown = Math.min(loaded, state.total);
+                    btn.querySelector('.dd-load-count').textContent = `(${countShown} of ${state.total})`;
+
+                    if (!data.hasMore) {
+                        // Hide button when all loaded
+                        document.getElementById(wrapId).style.display = 'none';
+                    } else {
+                        btn.classList.remove('loading');
+                        btn.querySelector('i').className = 'fa-solid fa-chevron-down';
+                        btn.disabled = false;
+                    }
+                } catch (err) {
+                    console.error('Pagination error:', err);
+                    removeSkeletons(skeletonWrapper);
+                    btn.classList.remove('loading');
+                    btn.querySelector('i').className = 'fa-solid fa-chevron-down';
+                    btn.disabled = false;
+                }
+
+                state.loading = false;
             }
         </script>
     </body>

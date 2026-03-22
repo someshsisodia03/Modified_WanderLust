@@ -34,13 +34,6 @@
                     <p class="icon-text">Arctic</p>
                 </a></div>
 
-            <div class="tax-box ms-auto">
-                <div class="form-check-reverse form-switch mb-0">
-                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
-                    <label class="form-check-label" for="flexSwitchCheckDefault"
-                        style="font-size:0.85rem;font-weight:500;">Show price with taxes</label>
-                </div>
-            </div>
         </div>
         </div>
 
@@ -51,7 +44,7 @@
                 style="padding: 0.75rem 2.5rem; background:#fff8f8; border-bottom:1px solid #fee2e2; display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
                 <i class="fa-solid fa-magnifying-glass" style="color:var(--brand);"></i>
                 <span style="font-size:0.92rem; font-weight:600; color:var(--dark);">
-                    <%= listdata.length %> result<%= listdata.length !==1 ? 's' : '' %> for
+                    <%= totalListings %> result<%= totalListings !==1 ? 's' : '' %> for
                             "<span style="color:var(--brand);">
                                 <%= searchQuery %>
                             </span>"
@@ -79,9 +72,9 @@
                                         style="text-decoration:none; margin-top:0.5rem;">View all listings</a>
                     </div>
                     <% } else { %>
-                        <div class="cards">
+                        <div class="cards" id="listings-grid">
                             <% for (let x of listdata){ %>
-                                <a href="/moreabout/<%=x.id%>?from=stays" class="cardLink">
+                                <a href="/moreabout/<%=x.id%>?from=stays" class="cardLink pg-card-animated">
                                     <div class="card">
                                         <div style="overflow:hidden;">
                                             <img src="<%=optimizeImg(x.image.url, 800, 450)%>" class="card-img-top" alt="<%=x.title%>">
@@ -96,22 +89,125 @@
                                             </div>
                                             <div class="card-price">
                                                 &#8377; <%=x.price.toLocaleString("en-IN")%>
-                                                    <span>/night <i class="tax-info">+GST</i></span>
+                                                    <span>/night</span>
                                             </div>
                                         </div>
                                     </div>
                                 </a>
                                 <% } %>
                         </div>
+
+                        <!-- Load More Button -->
+                        <% if(totalListings > perPage) { %>
+                            <div class="pg-load-more-wrap" id="listings-load-more-wrap">
+                                <button class="pg-load-more-btn" id="listings-load-more" onclick="loadMoreListings()">
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                    Load More Stays
+                                    <span class="pg-load-count">(<%= listdata.length %> of <%= totalListings %>)</span>
+                                </button>
+                            </div>
+                        <% } %>
                         <% } %>
 
+                            <style>
+                                .pg-card-animated{opacity:0;transform:translateY(24px);animation:pgFadeIn .5s ease forwards}
+                                .pg-card-animated:nth-child(1){animation-delay:.05s}.pg-card-animated:nth-child(2){animation-delay:.1s}
+                                .pg-card-animated:nth-child(3){animation-delay:.15s}.pg-card-animated:nth-child(4){animation-delay:.2s}
+                                .pg-card-animated:nth-child(5){animation-delay:.25s}.pg-card-animated:nth-child(6){animation-delay:.3s}
+                                @keyframes pgFadeIn{to{opacity:1;transform:translateY(0)}}
+                                .pg-skel{border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06);border:1px solid #f0f0f0}
+                                .pg-skel-img{width:100%;height:200px;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:pgShimmer 1.5s ease-in-out infinite}
+                                .pg-skel-body{padding:1rem}.pg-skel-line{height:14px;border-radius:6px;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:pgShimmer 1.5s ease-in-out infinite;margin-bottom:.6rem}
+                                .pg-skel-line.w75{width:75%}.pg-skel-line.w50{width:50%}.pg-skel-line.w30{width:30%}
+                                @keyframes pgShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+                                .pg-load-more-wrap{text-align:center;margin:2rem 0 1rem}
+                                .pg-load-more-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 2rem;border:2px solid var(--border);border-radius:50px;background:#fff;color:var(--dark);font-family:'Inter',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .3s ease}
+                                .pg-load-more-btn:hover{border-color:var(--brand);color:var(--brand);transform:translateY(-2px);box-shadow:0 6px 20px rgba(254,66,77,.15)}
+                                .pg-load-more-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+                                .pg-load-more-btn i{transition:transform .3s ease}.pg-load-more-btn:hover i{transform:translateY(3px)}
+                                .pg-load-count{font-size:.78rem;color:var(--muted);font-weight:500}
+                                .pg-load-more-btn.loading i{animation:pgSpin .8s linear infinite}
+                                @keyframes pgSpin{to{transform:rotate(360deg)}}
+                            </style>
+
                             <script>
-                                let toggler = document.getElementById("flexSwitchCheckDefault");
-                                toggler.addEventListener("click", () => {
-                                    let ele = document.getElementsByClassName("tax-info");
-                                    for (let x of ele) {
-                                        x.style.display = (x.style.display === "none" || x.style.display === "") ? "inline" : "none";
+                                // Pagination
+                                const listingsPerPage = <%= perPage %>;
+                                const totalListings = <%= totalListings %>;
+                                const searchQ = '<%= searchQuery %>';
+                                let listingsPage = 1;
+                                let listingsLoading = false;
+
+                                function optimizeImgUrl(url, w, h) {
+                                    w = w || 800; h = h || 450;
+                                    if (!url) return url;
+                                    if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+                                        return url.replace('/upload/', '/upload/w_' + w + ',h_' + h + ',c_fill,g_auto,q_auto:best,f_auto/');
                                     }
-                                });
+                                    return url;
+                                }
+
+                                function createSkeleton() {
+                                    return '<div class="pg-skel"><div class="pg-skel-img"></div><div class="pg-skel-body"><div class="pg-skel-line w75"></div><div class="pg-skel-line w50"></div><div class="pg-skel-line w30"></div></div></div>';
+                                }
+
+                                async function loadMoreListings() {
+                                    if (listingsLoading) return;
+                                    listingsLoading = true;
+                                    const btn = document.getElementById('listings-load-more');
+                                    btn.classList.add('loading');
+                                    btn.querySelector('i').className = 'fa-solid fa-spinner';
+                                    btn.disabled = true;
+
+                                    const grid = document.getElementById('listings-grid');
+                                    const skelWrap = document.createElement('div');
+                                    skelWrap.style.display = 'contents';
+                                    for (let i = 0; i < Math.min(listingsPerPage, 3); i++) {
+                                        const d = document.createElement('div'); d.style.display = 'contents';
+                                        d.innerHTML = createSkeleton(); skelWrap.appendChild(d);
+                                    }
+                                    grid.appendChild(skelWrap);
+                                    await new Promise(r => setTimeout(r, 600));
+
+                                    try {
+                                        const nextPage = listingsPage + 1;
+                                        let url = '/listing/api/paginate?page=' + nextPage;
+                                        if (searchQ) url += '&search=' + encodeURIComponent(searchQ);
+                                        const res = await fetch(url);
+                                        const data = await res.json();
+                                        if (skelWrap.parentNode) skelWrap.parentNode.removeChild(skelWrap);
+
+                                        data.items.forEach((item, i) => {
+                                            const imgUrl = item.image && item.image.url ? optimizeImgUrl(item.image.url) : '';
+                                            const price = Number(item.price).toLocaleString('en-IN');
+                                            const html = `<a href="/moreabout/${item._id}?from=stays" class="cardLink pg-card-animated" style="animation-delay:${i*0.08}s;">
+                                                <div class="card"><div style="overflow:hidden;"><img src="${imgUrl}" class="card-img-top" alt="${item.title}"></div>
+                                                <div class="card-body"><div class="card-title-text">${item.title}</div>
+                                                <div class="card-location"><i class="fa-solid fa-location-dot me-1" style="color:var(--brand);font-size:0.75rem;"></i>${item.location}, ${item.country}</div>
+                                                <div class="card-price">&#8377; ${price}<span>/night</span></div></div></div></a>`;
+                                            const t = document.createElement('div'); t.innerHTML = html;
+                                            grid.appendChild(t.firstElementChild);
+                                        });
+
+                                        listingsPage = nextPage;
+                                        const loaded = Math.min(listingsPage * listingsPerPage, totalListings);
+                                        btn.querySelector('.pg-load-count').textContent = '(' + loaded + ' of ' + totalListings + ')';
+
+                                        if (!data.hasMore) {
+                                            document.getElementById('listings-load-more-wrap').style.display = 'none';
+                                        } else {
+                                            btn.classList.remove('loading');
+                                            btn.querySelector('i').className = 'fa-solid fa-chevron-down';
+                                            btn.disabled = false;
+                                        }
+                                    } catch(e) {
+                                        console.error(e);
+                                        if (skelWrap.parentNode) skelWrap.parentNode.removeChild(skelWrap);
+                                        btn.classList.remove('loading');
+                                        btn.querySelector('i').className = 'fa-solid fa-chevron-down';
+                                        btn.disabled = false;
+                                    }
+                                    listingsLoading = false;
+                                }
                             </script>
     </body>

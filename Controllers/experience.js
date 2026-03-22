@@ -1,39 +1,58 @@
 const Experience = require('../Models/experienceModel.js');
 const Review = require('../Models/reviewModel.js');
 
+const EXP_PER_PAGE = 12;
+
 // GET /experiences — with SEARCH support
 module.exports.index = async (req, res) => {
     const searchQuery = req.query.search ? req.query.search.trim() : '';
-
     let filter = {};
     if (searchQuery) {
         const regex = new RegExp(searchQuery, 'i');
-        filter = {
-            $or: [
-                { title: regex },
-                { description: regex },
-                { category: regex },
-                { difficulty: regex }
-            ]
-        };
+        filter = { $or: [{ title: regex }, { description: regex }, { category: regex }, { difficulty: regex }] };
     }
 
+    const totalExperiences = await Experience.countDocuments(filter);
     const experiences = await Experience.find(filter)
         .populate('destination')
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .limit(EXP_PER_PAGE);
 
     res.locals.searchQuery = searchQuery;
-    res.render('experiences.ejs', { experiences, activeCategory: '', searchQuery });
+    res.render('experiences.ejs', { experiences, activeCategory: '', searchQuery, totalExperiences, perPage: EXP_PER_PAGE });
 };
 
 // GET /experiences/filter/:category
 module.exports.filterExperiences = async (req, res) => {
     const category = req.params.category;
-    const allExperiences = await Experience.find({})
+    const filter = { category };
+    const totalExperiences = await Experience.countDocuments(filter);
+    const experiences = await Experience.find(filter)
         .populate('destination')
-        .sort({ createdAt: -1 });
-    const experiences = allExperiences.filter(e => e.category === category);
-    res.render('experiences.ejs', { experiences, activeCategory: category, searchQuery: '' });
+        .sort({ createdAt: -1 })
+        .limit(EXP_PER_PAGE);
+    res.render('experiences.ejs', { experiences, activeCategory: category, searchQuery: '', totalExperiences, perPage: EXP_PER_PAGE });
+};
+
+// API: Paginate experiences
+module.exports.paginateExperiences = async (req, res) => {
+    const searchQuery = req.query.search ? req.query.search.trim() : '';
+    const category = req.query.category || '';
+    let filter = {};
+    if (searchQuery) {
+        const regex = new RegExp(searchQuery, 'i');
+        filter = { $or: [{ title: regex }, { description: regex }, { category: regex }, { difficulty: regex }] };
+    } else if (category) {
+        filter = { category };
+    }
+    const page = parseInt(req.query.page) || 1;
+    const skip = (page - 1) * EXP_PER_PAGE;
+    const total = await Experience.countDocuments(filter);
+    const items = await Experience.find(filter)
+        .populate('destination')
+        .sort({ createdAt: -1 })
+        .skip(skip).limit(EXP_PER_PAGE).lean();
+    res.json({ items, total, page, perPage: EXP_PER_PAGE, hasMore: skip + items.length < total });
 };
 
 // GET /experiences/:id

@@ -26,6 +26,9 @@ const valid = (req, res, next) => {
 //Show the listings... (login required)
 router.get("/listing", isLogged, wrapAsync(listingController.showlisting))
 
+// API: Paginate listings
+router.get("/listing/api/paginate", isLogged, wrapAsync(listingController.paginateListings))
+
 //Filter ke sath Listing (login required)
 router.get("/listing/show/:category", isLogged, wrapAsync(listingController.filter));
 

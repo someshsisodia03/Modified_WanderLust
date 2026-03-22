@@ -20,6 +20,9 @@ const reviewValid = (req, res, next) => {
 // GET /experiences (login required)
 router.get('/experiences', isLogged, wrapAsync(experienceController.index));
 
+// API: Paginate experiences
+router.get('/experiences/api/paginate', isLogged, wrapAsync(experienceController.paginateExperiences));
+
 // GET /experiences/filter/:category (login required)
 router.get('/experiences/filter/:category', isLogged, wrapAsync(experienceController.filterExperiences));
 

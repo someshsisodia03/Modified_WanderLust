@@ -2,40 +2,54 @@ let lstData = require("../Models/lstingModel.js")
 let review = require("../Models/reviewModel.js");
 const Experience = require("../Models/experienceModel.js");
 const Destination = require("../Models/destinationModel.js");
+
+const LISTING_PER_PAGE = 12;
 module.exports.showlisting = async (req, res) => {
     const searchQuery = req.query.search ? req.query.search.trim() : '';
-    let data;
-
+    let filter = {};
     if (searchQuery) {
-        // Case-insensitive search across title, location, country, and category
         const regex = new RegExp(searchQuery, 'i');
-        data = await lstData.find({
-            $or: [
-                { title: regex },
-                { location: regex },
-                { country: regex },
-                { category: regex }
-            ]
-        }).populate({ path: 'owner' });
-    } else {
-        data = await lstData.find({}).populate({ path: 'owner' });
+        filter = { $or: [{ title: regex }, { location: regex }, { country: regex }, { category: regex }] };
     }
+
+    const totalListings = await lstData.countDocuments(filter);
+    const data = await lstData.find(filter).populate({ path: 'owner' }).limit(LISTING_PER_PAGE);
 
     res.locals.err = req.flash('error');
     res.locals.msg = req.flash('success');
     res.locals.msge = req.flash('update');
     res.locals.del = req.flash('delete');
-    res.locals.searchQuery = searchQuery;   // so navbar keeps the search text
+    res.locals.searchQuery = searchQuery;
 
-    res.render('listData.ejs', { listdata: data, searchQuery });
+    res.render('listData.ejs', { listdata: data, searchQuery, totalListings, perPage: LISTING_PER_PAGE });
+}
+
+// API: Paginate listings
+module.exports.paginateListings = async (req, res) => {
+    const searchQuery = req.query.search ? req.query.search.trim() : '';
+    const category = req.query.category || '';
+    let filter = {};
+    if (searchQuery) {
+        const regex = new RegExp(searchQuery, 'i');
+        filter = { $or: [{ title: regex }, { location: regex }, { country: regex }, { category: regex }] };
+    } else if (category) {
+        filter = { category };
+    }
+    const page = parseInt(req.query.page) || 1;
+    const skip = (page - 1) * LISTING_PER_PAGE;
+    const total = await lstData.countDocuments(filter);
+    const items = await lstData.find(filter).populate({ path: 'owner' }).skip(skip).limit(LISTING_PER_PAGE).lean();
+    res.json({ items, total, page, perPage: LISTING_PER_PAGE, hasMore: skip + items.length < total });
 }
 module.exports.createlisting = (req, res) => {
     res.render("create.ejs");
 }
 module.exports.filter = async (req, res) => {
-    let data = await lstData.find({}).populate({ path: "owner" });
     let categor = req.params.category;
-    res.render("filter.ejs", { listdata: data, catg: categor });
+    const filter = { category: categor };
+    const totalFiltered = await lstData.countDocuments(filter);
+    let data = await lstData.find(filter).populate({ path: "owner" }).limit(LISTING_PER_PAGE);
+    res.render("filter.ejs", { listdata: data, catg: categor, totalFiltered, perPage: LISTING_PER_PAGE });
 }
 module.exports.edit = async (req, res) => {
     let { title, description, category, price, country, location,
