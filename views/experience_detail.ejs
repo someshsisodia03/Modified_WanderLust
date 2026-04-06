@@ -84,7 +84,7 @@
         <!-- ── Leave a Review ── -->
         <% if(curruser){ %>
             <div class="detail-card mt-3">
-                <div class="section-title"><i class="fa-solid fa-star" style="color:var(--brand);"></i> Leave a Review</div>
+                <div class="section-title"><i class="fa-solid fa-comment-dots" style="color:var(--brand);"></i> Leave a Review</div>
                 <form class="needs-validation" method="post" action="/experiences/<%= experience._id %>/review" novalidate>
                     <div class="mb-3">
                         <label for="comment" class="form-label">Your Comment</label>
@@ -92,24 +92,7 @@
                             placeholder="Share your experience…" rows="4" required></textarea>
                         <div class="invalid-feedback">Please write a review before submitting.</div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Rating</label>
-                        <fieldset class="starability-slot">
-                            <legend class="visually-hidden">Rating</legend>
-                            <input type="radio" id="exp-no-rate" class="input-no-rate" name="rating" value="0" checked
-                                aria-label="No rating." />
-                            <input type="radio" id="exp-rate1" name="rating" value="1" />
-                            <label for="exp-rate1" title="Terrible">1 star</label>
-                            <input type="radio" id="exp-rate2" name="rating" value="2" />
-                            <label for="exp-rate2" title="Not good">2 stars</label>
-                            <input type="radio" id="exp-rate3" name="rating" value="3" />
-                            <label for="exp-rate3" title="Average">3 stars</label>
-                            <input type="radio" id="exp-rate4" name="rating" value="4" />
-                            <label for="exp-rate4" title="Very good">4 stars</label>
-                            <input type="radio" id="exp-rate5" name="rating" value="5" />
-                            <label for="exp-rate5" title="Amazing">5 stars</label>
-                        </fieldset>
-                    </div>
+
                     <button type="submit" class="btn-wl"><i class="fa-solid fa-paper-plane"></i> Submit Review</button>
                 </form>
             </div>
@@ -143,7 +126,7 @@
                                         </form>
                                     <% } %>
                                 </div>
-                                <p class="starability-result" data-rating="<%= x.rating %>"></p>
+
                                 <p class="review-comment">"<%= x.comment %>"</p>
                                 <% if(x.createdAt){ %>
                                     <small style="color:var(--muted); font-size:0.75rem;">

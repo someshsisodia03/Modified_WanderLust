@@ -70,7 +70,7 @@
             <!-- Leave a Review -->
             <% if(curruser){ %>
                 <div class="detail-card mt-3">
-                    <div class="section-title"><i class="fa-solid fa-star" style="color:var(--brand);"></i> Leave a
+                    <div class="section-title"><i class="fa-solid fa-comment-dots" style="color:var(--brand);"></i> Leave a
                         Review</div>
                     <form class="needs-validation" method="post" action="/listing/<%=details.id%>/review" novalidate>
                         <div class="mb-3">
@@ -79,24 +79,7 @@
                                 placeholder="Share your experience at this place…" rows="4" required></textarea>
                             <div class="invalid-feedback">Please write a review before submitting.</div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Rating</label>
-                            <fieldset class="starability-slot">
-                                <legend class="visually-hidden">Rating</legend>
-                                <input type="radio" id="no-rate" class="input-no-rate" name="rating" value="0" checked
-                                    aria-label="No rating." />
-                                <input type="radio" id="first-rate1" name="rating" value="1" />
-                                <label for="first-rate1" title="Terrible">1 star</label>
-                                <input type="radio" id="first-rate2" name="rating" value="2" />
-                                <label for="first-rate2" title="Not good">2 stars</label>
-                                <input type="radio" id="first-rate3" name="rating" value="3" />
-                                <label for="first-rate3" title="Average">3 stars</label>
-                                <input type="radio" id="first-rate4" name="rating" value="4" />
-                                <label for="first-rate4" title="Very good">4 stars</label>
-                                <input type="radio" id="first-rate5" name="rating" value="5" />
-                                <label for="first-rate5" title="Amazing">5 stars</label>
-                            </fieldset>
-                        </div>
+
                         <button type="submit" class="btn-wl"><i class="fa-solid fa-paper-plane"></i> Submit
                             Review</button>
                     </form>
@@ -126,7 +109,7 @@
                                                     </form>
                                                     <% } %>
                                             </div>
-                                            <p class="starability-result" data-rating="<%=x.rating%>"></p>
+
                                             <p class="review-comment">"<%=x.comment%>"</p>
                                             <% if(x.createdAt){ %>
                                                 <small style="color:var(--muted); font-size:0.75rem;">
@@ -141,6 +124,209 @@
                             </div>
                         </div>
                         <% } %>
+
+                            <!-- ── AI Sentiment Analysis Card ── -->
+                            <div class="detail-card mt-3" id="sentiment-section" style="display:none;">
+                                <div class="section-title">
+                                    <i class="fa-solid fa-brain" style="color:var(--brand);"></i>
+                                    Sentiment Analysis
+                                    <span id="sentiment-badge" style="margin-left:0.6rem; font-size:0.72rem; font-weight:600; padding:0.2rem 0.65rem; border-radius:50px; vertical-align:middle;"></span>
+                                </div>
+
+                                <!-- Skeleton loader -->
+                                <div id="sentiment-loading">
+                                    <div style="display:flex; gap:1.5rem; flex-wrap:wrap; align-items:center;">
+                                        <div style="width:90px; height:90px; border-radius:50%; background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:recShimmer 1.5s ease-in-out infinite;"></div>
+                                        <div style="flex:1; min-width:180px;">
+                                            <div style="height:12px; border-radius:6px; background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:recShimmer 1.5s ease-in-out infinite; margin-bottom:0.6rem;"></div>
+                                            <div style="height:12px; border-radius:6px; background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:recShimmer 1.5s ease-in-out infinite; margin-bottom:0.6rem; width:80%;"></div>
+                                            <div style="height:12px; border-radius:6px; background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:recShimmer 1.5s ease-in-out infinite; width:60%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Actual content (hidden until loaded) -->
+                                <div id="sentiment-content" style="display:none;">
+
+                                    <!-- Row 1: Score gauge + breakdown -->
+                                    <div style="display:flex; gap:1.5rem; flex-wrap:wrap; align-items:flex-start; margin-bottom:1.2rem;">
+
+                                        <!-- Circular score gauge -->
+                                        <div style="text-align:center; min-width:100px;">
+                                            <div style="position:relative; width:90px; height:90px; margin:0 auto;">
+                                                <svg width="90" height="90" viewBox="0 0 90 90">
+                                                    <circle cx="45" cy="45" r="38" fill="none" stroke="#f0f0f0" stroke-width="8"/>
+                                                    <circle id="sent-gauge-ring" cx="45" cy="45" r="38" fill="none" stroke="#22c55e" stroke-width="8"
+                                                        stroke-linecap="round"
+                                                        stroke-dasharray="239"
+                                                        stroke-dashoffset="239"
+                                                        transform="rotate(-90 45 45)"
+                                                        style="transition: stroke-dashoffset 1s ease, stroke 0.5s ease;"/>
+                                                </svg>
+                                                <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                                                    <span id="sent-score-text" style="font-size:1.4rem; font-weight:800; color:#1a1a2e; line-height:1;">-</span>
+                                                    <span style="font-size:0.6rem; color:#6b7280; font-weight:500;">/ 5</span>
+                                                </div>
+                                            </div>
+                                            <div id="sent-label-text" style="font-size:0.75rem; font-weight:600; margin-top:0.4rem; color:#374151;"></div>
+                                            <div id="sent-review-count" style="font-size:0.68rem; color:#9ca3af; margin-top:0.1rem;"></div>
+                                        </div>
+
+                                        <!-- Breakdown bars -->
+                                        <div style="flex:1; min-width:180px; display:flex; flex-direction:column; gap:0.6rem; justify-content:center;">
+                                            <div>
+                                                <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:3px;">
+                                                    <span>😊 Positive</span><span id="pct-pos">0%</span>
+                                                </div>
+                                                <div style="background:#f0fdf4; border-radius:50px; height:8px; overflow:hidden;">
+                                                    <div id="bar-pos" style="height:100%; border-radius:50px; background:linear-gradient(90deg,#22c55e,#4ade80); width:0%; transition:width 1s ease;"></div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:3px;">
+                                                    <span>😐 Neutral</span><span id="pct-neu">0%</span>
+                                                </div>
+                                                <div style="background:#fefce8; border-radius:50px; height:8px; overflow:hidden;">
+                                                    <div id="bar-neu" style="height:100%; border-radius:50px; background:linear-gradient(90deg,#eab308,#fbbf24); width:0%; transition:width 1s ease 0.1s;"></div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:600; color:#374151; margin-bottom:3px;">
+                                                    <span>😞 Negative</span><span id="pct-neg">0%</span>
+                                                </div>
+                                                <div style="background:#fff1f2; border-radius:50px; height:8px; overflow:hidden;">
+                                                    <div id="bar-neg" style="height:100%; border-radius:50px; background:linear-gradient(90deg,#ef4444,#f87171); width:0%; transition:width 1s ease 0.2s;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Row 2: Top themes -->
+                                    <div id="themes-row" style="margin-bottom:1rem; display:none;">
+                                        <div style="font-size:0.78rem; font-weight:600; color:#374151; margin-bottom:0.5rem;">
+                                            <i class="fa-solid fa-tags me-1" style="color:var(--brand);"></i> Top Themes
+                                        </div>
+                                        <div id="themes-container" style="display:flex; flex-wrap:wrap; gap:0.4rem;"></div>
+                                    </div>
+
+                                    <!-- Row 3: AI Summary -->
+                                    <div id="ai-summary-row" style="display:none; background:linear-gradient(135deg,#f8faff,#f0f4ff); border-radius:12px; padding:0.9rem 1rem; border-left:3px solid var(--brand);">
+                                        <div style="font-size:0.73rem; font-weight:700; color:var(--brand); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.35rem;">
+                                            <i class="fa-solid fa-wand-sparkles me-1"></i> Summary
+                                        </div>
+                                        <p id="ai-summary-text" style="font-size:0.88rem; color:#374151; margin:0; line-height:1.6; font-style:italic;"></p>
+                                    </div>
+
+                                    <!-- No data state -->
+                                    <div id="sentiment-empty" style="display:none; text-align:center; padding:1.5rem; color:#9ca3af; font-size:0.85rem;">
+                                        <i class="fa-solid fa-chart-pie me-1"></i> Not enough reviews to analyze yet.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sentiment Script -->
+                            <script>
+                            (function() {
+                                var listingId = '<%= details.id %>';
+                                var section   = document.getElementById('sentiment-section');
+                                var loading   = document.getElementById('sentiment-loading');
+                                var content   = document.getElementById('sentiment-content');
+
+                                // Only fetch if there are reviews
+                                var reviewCount = <%= details.reviews.length %>;
+                                if (reviewCount === 0) return;
+
+                                section.style.display = 'block';
+
+                                fetch('/api/sentiment/' + listingId)
+                                    .then(function(r) { return r.json(); })
+                                    .then(function(d) {
+                                        loading.style.display = 'none';
+                                        content.style.display  = 'block';
+
+                                        if (!d.analyzed || d.analyzed === 0) {
+                                            document.getElementById('sentiment-empty').style.display = 'block';
+                                            return;
+                                        }
+
+                                        // ── Badge ──
+                                        var badge = document.getElementById('sentiment-badge');
+                                        var dominant = d.breakdown.positive >= d.breakdown.negative ? 'positive' : 'negative';
+                                        if (d.breakdown.positive >= 50) {
+                                            badge.textContent = '😊 Mostly Positive';
+                                            badge.style.cssText += 'background:#dcfce7; color:#166534;';
+                                        } else if (d.breakdown.negative >= 50) {
+                                            badge.textContent = '😞 Mostly Negative';
+                                            badge.style.cssText += 'background:#fee2e2; color:#991b1b;';
+                                        } else {
+                                            badge.textContent = '😐 Mixed Reviews';
+                                            badge.style.cssText += 'background:#fef9c3; color:#713f12;';
+                                        }
+
+                                        // ── Score gauge ──
+                                        var score = d.avgScore || 0;
+                                        document.getElementById('sent-score-text').textContent = score.toFixed(1);
+                                        document.getElementById('sent-review-count').textContent = d.analyzed + ' of ' + d.totalReviews + ' analyzed';
+
+                                        var labelEl = document.getElementById('sent-label-text');
+                                        var ring    = document.getElementById('sent-gauge-ring');
+                                        var circumference = 239;
+                                        var offset = circumference - (score / 5) * circumference;
+                                        setTimeout(function() { ring.style.strokeDashoffset = offset; }, 100);
+
+                                        if (score >= 4) {
+                                            ring.style.stroke = '#22c55e';
+                                            labelEl.textContent = '⭐ Excellent';
+                                            labelEl.style.color = '#16a34a';
+                                        } else if (score >= 3) {
+                                            ring.style.stroke = '#eab308';
+                                            labelEl.textContent = '👍 Good';
+                                            labelEl.style.color = '#ca8a04';
+                                        } else {
+                                            ring.style.stroke = '#ef4444';
+                                            labelEl.textContent = '👎 Below Average';
+                                            labelEl.style.color = '#dc2626';
+                                        }
+
+                                        // ── Breakdown bars ──
+                                        var b = d.breakdown;
+                                        setTimeout(function() {
+                                            document.getElementById('bar-pos').style.width = b.positive + '%';
+                                            document.getElementById('bar-neu').style.width = b.neutral  + '%';
+                                            document.getElementById('bar-neg').style.width = b.negative + '%';
+                                        }, 100);
+                                        document.getElementById('pct-pos').textContent = b.positive + '%';
+                                        document.getElementById('pct-neu').textContent = b.neutral  + '%';
+                                        document.getElementById('pct-neg').textContent = b.negative + '%';
+
+                                        // ── Themes ──
+                                        if (d.topThemes && d.topThemes.length > 0) {
+                                            var row = document.getElementById('themes-row');
+                                            var container = document.getElementById('themes-container');
+                                            row.style.display = 'block';
+                                            d.topThemes.forEach(function(t) {
+                                                var chip = document.createElement('span');
+                                                var isPos = t.sentiment === 'positive';
+                                                chip.textContent = (isPos ? '✅ ' : '⚠️ ') + t.theme;
+                                                chip.style.cssText = 'display:inline-block; padding:0.25rem 0.7rem; border-radius:50px; font-size:0.72rem; font-weight:600; cursor:default; ' +
+                                                    (isPos ? 'background:#dcfce7; color:#166534; border:1px solid #bbf7d0;' : 'background:#fee2e2; color:#991b1b; border:1px solid #fecaca;');
+                                                container.appendChild(chip);
+                                            });
+                                        }
+
+                                        // ── AI Summary ──
+                                        if (d.aiSummary && d.aiSummary.trim().length > 0) {
+                                            document.getElementById('ai-summary-row').style.display = 'block';
+                                            document.getElementById('ai-summary-text').textContent = d.aiSummary;
+                                        }
+                                    })
+                                    .catch(function() {
+                                        loading.style.display = 'none';
+                                        content.style.display = 'block';
+                                        document.getElementById('sentiment-empty').style.display = 'block';
+                                    });
+                            })();
+                            </script>
 
                             <!-- Map -->
                             <div class="detail-card mt-3">
@@ -171,9 +357,6 @@
                                 <div class="section-title">
                                     <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--brand);"></i>
                                     Similar Places You'll Love
-                                    <span style="font-size:0.7rem; font-weight:500; color:var(--muted); margin-left:0.5rem; background:#f3f4f6; padding:0.15rem 0.6rem; border-radius:50px;">
-                                        <i class="fa-solid fa-microchip me-1"></i>AI Powered
-                                    </span>
                                 </div>
                                 <div id="rec-loading" style="display:flex; gap:1rem; overflow:hidden;">
                                     <div style="flex:1; min-width:200px; height:180px; border-radius:14px; background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:recShimmer 1.5s ease-in-out infinite;"></div>
@@ -181,6 +364,12 @@
                                     <div style="flex:1; min-width:200px; height:180px; border-radius:14px; background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:recShimmer 1.5s ease-in-out infinite; animation-delay:0.4s;"></div>
                                 </div>
                                 <div id="rec-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:1rem;"></div>
+                                <div id="rec-empty" style="display:none; text-align:center; padding:2rem 1rem;">
+                                    <div style="width:56px; height:56px; margin:0 auto 0.75rem; background:#f1f5f9; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                                        <i class="fa-regular fa-compass" style="font-size:1.5rem; color:#94a3b8;"></i>
+                                    </div>
+                                    <p style="color:#6b7280; font-size:0.9rem; margin:0;">No similar places found</p>
+                                </div>
                             </div>
 
                             <style>
@@ -273,17 +462,17 @@
                 fetch('/api/recommendations/listing/' + listingId)
                     .then(function(r) { return r.json(); })
                     .then(function(data) {
-                        section.style.display = 'block';
                         loading.style.display = 'none';
 
                         if (!data.recommendations || data.recommendations.length === 0) {
-                            grid.innerHTML = '<div style="text-align:center; padding:2rem 1rem; color:#9ca3af;">' +
-                                '<i class="fa-solid fa-compass" style="font-size:2rem; margin-bottom:0.75rem; display:block; color:#d1d5db;"></i>' +
-                                '<p style="font-size:0.95rem; font-weight:600; color:#6b7280; margin:0;">No similar places found</p>' +
-                                '<p style="font-size:0.8rem; margin:0.25rem 0 0;">This place is unique! We couldn\'t find close matches above 75% similarity.</p>' +
-                                '</div>';
+                            // No matches — show empty state
+                            section.style.display = 'block';
+                            document.getElementById('rec-empty').style.display = 'block';
                             return;
                         }
+
+                        // Has results — show the section
+                        section.style.display = 'block';
 
                         data.recommendations.forEach(function(rec) {
                             var imgUrl = rec.image && rec.image.url ? rec.image.url : '';
@@ -307,12 +496,10 @@
                         });
                     })
                     .catch(function(err) {
-                        section.style.display = 'block';
+                        // On error — show empty state
                         loading.style.display = 'none';
-                        grid.innerHTML = '<div style="text-align:center; padding:2rem 1rem; color:#9ca3af;">' +
-                            '<i class="fa-solid fa-compass" style="font-size:2rem; margin-bottom:0.75rem; display:block; color:#d1d5db;"></i>' +
-                            '<p style="font-size:0.95rem; font-weight:600; color:#6b7280; margin:0;">No similar places found</p>' +
-                            '</div>';
+                        section.style.display = 'block';
+                        document.getElementById('rec-empty').style.display = 'block';
                     });
             })();
         </script>

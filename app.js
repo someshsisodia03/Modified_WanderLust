@@ -16,6 +16,7 @@ app.use(express.static(path.join(__dirname, "public")));
 var methodOverride = require('method-override');
 app.use(methodOverride('_method'));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // Required for POST /api/chat (JSON body parsing)
 const ExpressError = require("./ExpressError.js");
 const mongoose = require('mongoose');
 
@@ -26,6 +27,8 @@ let signLogin = require("./Routes/usersignupLogin.js")
 let destinationRoutes = require("./Routes/destination.js");
 let experienceRoutes = require("./Routes/experience.js");
 let recommendationRoutes = require("./Routes/recommendation.js");
+let chatRoutes = require("./Routes/chat.js");
+let sentimentRoutes = require("./Routes/sentiment.js");
 
 // MongoDB connection
 async function main() {
@@ -108,6 +111,8 @@ app.use("/", signLogin);
 app.use("/", destinationRoutes);
 app.use("/", experienceRoutes);
 app.use("/", recommendationRoutes);
+app.use("/", chatRoutes);
+app.use("/", sentimentRoutes);
 
 // 404 handler
 app.all("*", (req, res, next) => {

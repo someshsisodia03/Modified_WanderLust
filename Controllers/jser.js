@@ -29,12 +29,16 @@ module.exports.listingloginone=(req,res)=>{
 module.exports.listinglogintwo=
 async(req, res) => {        
     let { username } = req.body;
-    if(!res.locals.redirectUrl){
-        req.flash("success", `Hi ${username}, Welcome back to WanderLust`);
+    const redirectTo = res.locals.redirectUrl;
+    // Clear the saved redirect URL so it doesn't persist across navigations
+    delete req.session.redirectUrl;
+    req.flash("success", `Hi ${username}, Welcome back to WanderLust`);
+    if(!redirectTo){
         return res.redirect("/destinations");
     }
-    res.redirect(res.locals.redirectUrl);
+    res.redirect(redirectTo);
 }
+
 module.exports.logout=(req,res)=>{
     req.logout(()=>{
     req.flash("success","You have been successfully logged-out");

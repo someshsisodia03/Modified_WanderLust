@@ -78,10 +78,9 @@ module.exports.show = async (req, res) => {
 
 // POST /experiences/:id/review
 module.exports.addReview = async (req, res) => {
-    const { comment, rating } = req.body;
+    const { comment } = req.body;
     const newReview = new Review({
         comment,
-        rating: parseInt(rating),
         author: req.user._id
     });
     await newReview.save();

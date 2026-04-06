@@ -10,7 +10,6 @@ const ExpressError = require('../ExpressError.js');
 const reviewValid = (req, res, next) => {
     const schema = Joi.object({
         comment: Joi.string().required(),
-        rating: Joi.number().min(1).max(5).required()
     });
     const { error } = schema.validate(req.body);
     if (error) throw new ExpressError(400, error);
