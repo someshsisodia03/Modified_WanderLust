@@ -1053,7 +1053,7 @@
                 </script>
 
     <!-- ══════════════════════════════════════════
-         WanderLust AI Travel Assistant (RAG Chat)
+         WanderLust AI Agent (ReAct Loop + Tool Calling)
          ══════════════════════════════════════════ -->
     <style>
         /* ── Chat FAB Button ── */
@@ -1457,6 +1457,97 @@
         }
         .chat-card:hover .chat-card-arrow { opacity: 1; }
 
+        /* ── Agent Tool Trace ── */
+        .agent-trace {
+            margin-top: 0.6rem;
+            border-top: 1px solid rgba(0,0,0,0.06);
+            padding-top: 0.5rem;
+        }
+        .agent-trace-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #6366f1;
+            cursor: pointer;
+            background: #eef2ff;
+            border: none;
+            border-radius: 50px;
+            padding: 0.2rem 0.6rem;
+            transition: all 0.2s ease;
+        }
+        .agent-trace-toggle:hover { background: #e0e7ff; }
+        .agent-trace-toggle i {
+            transition: transform 0.2s ease;
+            font-size: 0.6rem;
+        }
+        .agent-trace-toggle.expanded i { transform: rotate(180deg); }
+        .agent-trace-steps {
+            display: none;
+            margin-top: 0.4rem;
+            padding-left: 0.6rem;
+            border-left: 2px solid #e0e7ff;
+        }
+        .agent-trace-steps.show { display: block; }
+        .agent-step {
+            padding: 0.35rem 0 0.35rem 0.6rem;
+            font-size: 0.72rem;
+            color: var(--text);
+            position: relative;
+            animation: stepIn 0.3s ease both;
+        }
+        .agent-step::before {
+            content: '';
+            position: absolute;
+            left: -7px;
+            top: 0.55rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(99,102,241,0.3);
+        }
+        @keyframes stepIn {
+            from { opacity: 0; transform: translateX(-8px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        .agent-step-tool {
+            font-weight: 700;
+            color: #6366f1;
+            font-family: 'Inter', monospace;
+        }
+        .agent-step-args {
+            color: var(--muted);
+            font-size: 0.68rem;
+            font-style: italic;
+        }
+        .agent-step-result {
+            color: #16a34a;
+            font-size: 0.68rem;
+            font-weight: 500;
+        }
+        .agent-step-time {
+            color: var(--muted);
+            font-size: 0.62rem;
+            margin-left: 0.3rem;
+        }
+        /* ── Agent Badge ── */
+        .agent-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.55);
+            padding: 0.15rem 0.5rem;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50px;
+        }
+
         @media (max-width: 480px) {
             #wl-chat-panel { right: 0.75rem; width: calc(100vw - 1.5rem); }
             #wl-chat-fab   { right: 1rem; bottom: 1.25rem; }
@@ -1476,24 +1567,25 @@
         <div class="chat-resize-handle" id="wl-chat-resize" title="Drag to resize"></div>
         <!-- Header -->
         <div class="chat-header">
-            <div class="chat-header-avatar"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            <div class="chat-header-avatar"><i class="fa-solid fa-robot"></i></div>
             <div class="chat-header-info">
-                <div class="chat-header-name">WanderLust AI</div>
+                <div class="chat-header-name">WanderLust AI Agent</div>
                 <div class="chat-header-status">
                     <span class="chat-status-dot"></span>
-                    Online
+                    Online · ReAct Agent
                 </div>
             </div>
+            <span class="agent-badge"><i class="fa-solid fa-microchip"></i> Agent</span>
         </div>
 
         <!-- Messages -->
         <div class="chat-messages" id="wl-chat-messages">
             <!-- Welcome message from AI -->
             <div class="chat-msg bot" id="wl-welcome-msg">
-                <div class="msg-avatar"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
                 <div class="msg-bubble">
-                    Hey there! ✨ I'm your AI travel assistant, powered by real WanderLust data.<br><br>
-                    Ask me anything — <strong>find stays, explore experiences, or discover destinations!</strong>
+                    Hey there! 🤖 I'm your <strong>AI Travel Agent</strong> — I autonomously search, compare, and analyze to find the best options for you.<br><br>
+                    Try: <em>"Compare beach stays in Malibu"</em> or <em>"Plan a 3-day trip to Dubai"</em>
                 </div>
             </div>
         </div>
@@ -1501,9 +1593,9 @@
         <!-- Suggested prompts (shown initially) -->
         <div class="chat-suggestions" id="wl-suggestions">
             <button class="chat-suggestion-chip" onclick="wlSendSuggestion(this)">🏖️ Beach stays under ₹5000</button>
-            <button class="chat-suggestion-chip" onclick="wlSendSuggestion(this)">🏔️ Mountain adventures</button>
-            <button class="chat-suggestion-chip" onclick="wlSendSuggestion(this)">🌆 Iconic city experiences</button>
-            <button class="chat-suggestion-chip" onclick="wlSendSuggestion(this)">⛺ Camping in forests</button>
+            <button class="chat-suggestion-chip" onclick="wlSendSuggestion(this)">⚖️ Compare mountain stays</button>
+            <button class="chat-suggestion-chip" onclick="wlSendSuggestion(this)">🗺️ Plan a trip to Dubai</button>
+            <button class="chat-suggestion-chip" onclick="wlSendSuggestion(this)">⭐ Best reviewed experiences</button>
         </div>
 
         <!-- Input -->
@@ -1577,7 +1669,7 @@
 
             const iconHtml = isUser
                 ? '<i class="fa-solid fa-user"></i>'
-                : '<i class="fa-solid fa-wand-magic-sparkles"></i>';
+                : '<i class="fa-solid fa-robot"></i>';
 
             // Convert line breaks to <br> for bot messages
             const safeText = isUser
@@ -1599,7 +1691,7 @@
             el.className = 'typing-indicator';
             el.id = 'wl-typing';
             el.innerHTML =
-                '<div class="msg-avatar"><i class="fa-solid fa-wand-magic-sparkles"></i></div>' +
+                '<div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>' +
                 '<div class="typing-dots"><span></span><span></span><span></span></div>';
             messages.appendChild(el);
             messages.scrollTop = messages.scrollHeight;
@@ -1640,12 +1732,12 @@
             showTyping();
 
             try {
-                const res = await fetch('/api/chat', {
+                const res = await fetch('/api/agent', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: text,
-                        history: chatHistory.slice(0, -1) // send history WITHOUT current msg
+                        history: chatHistory.slice(0, -1)
                     })
                 });
                 const data = await res.json();
@@ -1654,6 +1746,13 @@
                 const replyText = data.reply || "Sorry, I couldn't get a response. Please try again.";
                 const msgEl = appendMessage(replyText, 'bot');
                 addToHistory('bot', replyText);
+
+                // Render agent tool trace (shows ReAct reasoning steps)
+                if (data.toolTrace && data.toolTrace.length > 0) {
+                    const bubble = msgEl.querySelector('.msg-bubble');
+                    const traceHtml = buildToolTraceHtml(data.toolTrace);
+                    bubble.insertAdjacentHTML('beforeend', traceHtml);
+                }
 
                 // Render visual cards if returned
                 if (data.cards && data.cards.length > 0) {
@@ -1706,6 +1805,59 @@
             }).join('');
 
             return `<div class="chat-cards">${cardItems}</div>`;
+        }
+
+        // ── Build HTML for agent tool trace (ReAct steps) ──
+        function buildToolTraceHtml(trace) {
+            if (!trace || trace.length === 0) return '';
+            const traceId = 'trace-' + Date.now();
+            const toolIcons = {
+                search_stays: '🏨', search_experiences: '🎯',
+                search_destinations: '🌍', get_listing_details: '📋',
+                get_reviews: '⭐', compare_listings: '⚖️',
+                find_similar: '🔗', plan_itinerary: '🗺️'
+            };
+            const steps = trace.map((step, i) => {
+                const icon = toolIcons[step.tool] || '🔧';
+                const argsStr = Object.entries(step.args || {})
+                    .map(([k,v]) => k + '=' + escapeHtml(String(v)))
+                    .join(', ');
+                let resultStr = '';
+                if (step.result) {
+                    if (step.result.error) {
+                        resultStr = '❌ ' + escapeHtml(step.result.error);
+                    } else if (step.result.found !== undefined) {
+                        resultStr = '✅ Found ' + step.result.found + ' results';
+                    } else if (step.result.title) {
+                        resultStr = '✅ ' + escapeHtml(step.result.title);
+                    } else if (step.result.total !== undefined) {
+                        resultStr = '✅ ' + step.result.total + ' reviews (avg: ' + (step.result.avg_score || 'N/A') + ')';
+                    } else if (step.result.item1) {
+                        resultStr = '✅ Compared: ' + escapeHtml(step.result.item1) + ' vs ' + escapeHtml(step.result.item2);
+                    } else if (step.result.similar) {
+                        resultStr = '✅ Found ' + step.result.similar.length + ' similar';
+                    } else if (step.result.destination) {
+                        resultStr = '✅ ' + escapeHtml(step.result.destination) + ' (' + step.result.days + ' days)';
+                    } else {
+                        resultStr = '✅ Done';
+                    }
+                }
+                const timeStr = step.duration ? step.duration + 'ms' : '';
+                return `<div class="agent-step" style="animation-delay:${i*0.1}s">
+                    <span class="agent-step-tool">${icon} ${escapeHtml(step.tool)}</span>
+                    ${argsStr ? '<br><span class="agent-step-args">' + argsStr + '</span>' : ''}
+                    <br><span class="agent-step-result">${resultStr}</span>
+                    <span class="agent-step-time">${timeStr}</span>
+                </div>`;
+            }).join('');
+
+            return `<div class="agent-trace">
+                <button class="agent-trace-toggle" onclick="(function(b){var s=b.nextElementSibling;s.classList.toggle('show');b.classList.toggle('expanded')})(this)">
+                    <i class="fa-solid fa-microchip"></i> ${trace.length} tool${trace.length>1?'s':''} used
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+                <div class="agent-trace-steps" id="${traceId}">${steps}</div>
+            </div>`;
         }
     })();
     </script>

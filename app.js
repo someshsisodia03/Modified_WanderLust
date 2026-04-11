@@ -29,6 +29,7 @@ let experienceRoutes = require("./Routes/experience.js");
 let recommendationRoutes = require("./Routes/recommendation.js");
 let chatRoutes = require("./Routes/chat.js");
 let sentimentRoutes = require("./Routes/sentiment.js");
+let agentRoutes = require("./Routes/agent.js");
 
 // MongoDB connection
 async function main() {
@@ -113,6 +114,7 @@ app.use("/", experienceRoutes);
 app.use("/", recommendationRoutes);
 app.use("/", chatRoutes);
 app.use("/", sentimentRoutes);
+app.use("/", agentRoutes);
 
 // 404 handler
 app.all("*", (req, res, next) => {
