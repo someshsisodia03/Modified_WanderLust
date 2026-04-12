@@ -39,7 +39,11 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="category" class="form-label">Category</label>
+                        <label for="category" class="form-label">Category
+                            <span id="ai-cat-badge" style="display:none; margin-left:0.5rem; font-size:0.62rem; font-weight:600; padding:0.15rem 0.5rem; border-radius:50px; background:#eef2ff; color:#6366f1; vertical-align:middle;">
+                                <i class="fa-solid fa-robot" style="font-size:0.55rem;"></i> AI-Assisted
+                            </span>
+                        </label>
                         <select class="form-control" id="category" name="category" required>
                             <option value="">Select a category</option>
                             <option value="Trending">🔥 Trending</option>
@@ -53,6 +57,19 @@
                             <option value="Arctic">❄️ Arctic</option>
                         </select>
                         <div class="invalid-feedback">Please select a category.</div>
+
+                        <!-- AI Prediction Panel -->
+                        <div id="ai-predict-panel" style="display:none; margin-top:0.6rem; padding:0.75rem 0.85rem; background:linear-gradient(135deg,#fafbff,#f0f4ff); border-radius:12px; border:1px solid #e0e7ff;">
+                            <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.5rem;">
+                                <i class="fa-solid fa-robot" style="color:#6366f1; font-size:0.75rem;"></i>
+                                <span style="font-size:0.72rem; font-weight:700; color:#6366f1; text-transform:uppercase; letter-spacing:0.05em;">Naive Bayes Prediction</span>
+                                <span id="ai-predict-loading" style="display:none;"><i class="fa-solid fa-spinner fa-spin" style="font-size:0.7rem; color:#6366f1;"></i></span>
+                            </div>
+                            <div id="ai-predict-results"></div>
+                            <button type="button" id="ai-accept-btn" style="display:none; margin-top:0.5rem; font-size:0.7rem; font-weight:600; color:white; background:linear-gradient(135deg,#6366f1,#8b5cf6); border:none; border-radius:50px; padding:0.3rem 0.8rem; cursor:pointer; transition:all 0.2s;">
+                                <i class="fa-solid fa-check"></i> Accept AI Suggestion
+                            </button>
+                        </div>
                     </div>
                     <div class="mb-4">
                         <label for="location" class="form-label">Location</label>
@@ -111,7 +128,11 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="expCategory" class="form-label">Category</label>
+                                    <label for="expCategory" class="form-label">Category
+                                        <span id="exp-ai-badge" style="display:none; margin-left:0.5rem; font-size:0.62rem; font-weight:600; padding:0.15rem 0.5rem; border-radius:50px; background:#fef3c7; color:#d97706; vertical-align:middle;">
+                                            <i class="fa-solid fa-robot" style="font-size:0.55rem;"></i> AI-Assisted
+                                        </span>
+                                    </label>
                                     <select class="form-control" id="expCategory" name="expCategory">
                                         <option value="">Same as listing</option>
                                         <option value="Trending">🔥 Trending</option>
@@ -124,6 +145,19 @@
                                         <option value="Farms">🚜 Farms</option>
                                         <option value="Arctic">❄️ Arctic</option>
                                     </select>
+
+                                    <!-- Experience AI Prediction Panel -->
+                                    <div id="exp-ai-panel" style="display:none; margin-top:0.6rem; padding:0.75rem 0.85rem; background:linear-gradient(135deg,#fffdf5,#fef9e7); border-radius:12px; border:1px solid #fde68a;">
+                                        <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.5rem;">
+                                            <i class="fa-solid fa-robot" style="color:#d97706; font-size:0.75rem;"></i>
+                                            <span style="font-size:0.72rem; font-weight:700; color:#d97706; text-transform:uppercase; letter-spacing:0.05em;">Experience Prediction</span>
+                                            <span id="exp-ai-loading" style="display:none;"><i class="fa-solid fa-spinner fa-spin" style="font-size:0.7rem; color:#d97706;"></i></span>
+                                        </div>
+                                        <div id="exp-ai-results"></div>
+                                        <button type="button" id="exp-ai-accept" style="display:none; margin-top:0.5rem; font-size:0.7rem; font-weight:600; color:white; background:linear-gradient(135deg,#d97706,#f59e0b); border:none; border-radius:50px; padding:0.3rem 0.8rem; cursor:pointer; transition:all 0.2s;">
+                                            <i class="fa-solid fa-check"></i> Accept
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="row g-3 mb-3">
                                     <div class="col-md-4">
@@ -294,6 +328,163 @@
                     form.submit();
                 }
             });
+        </script>
+
+        <!-- ── AI Category Prediction Script (Naive Bayes) ── -->
+        <script>
+        (function() {
+            // ── Shared config ──
+            var catIcons = {
+                'Trending': '🔥', 'Rooms': '🛏️', 'Iconic Cities': '🌆',
+                'Mountains': '⛰️', 'Castles': '🏰', 'Beaches': '🏖️',
+                'Camping': '⛺', 'Farms': '🚜', 'Arctic': '❄️'
+            };
+            var barColors = ['#6366f1', '#8b5cf6', '#a78bfa'];
+
+            /**
+             * Creates an independent AI predictor for a section.
+             * Each section (listing / experience) gets its own predictor
+             * that watches its own title + description fields.
+             */
+            function createPredictor(config) {
+                var titleEl = document.getElementById(config.titleId);
+                var descEl = document.getElementById(config.descId);
+                var selectEl = document.getElementById(config.selectId);
+                var panel = document.getElementById(config.panelId);
+                var resultsDiv = document.getElementById(config.resultsId);
+                var loadingEl = document.getElementById(config.loadingId);
+                var acceptBtn = document.getElementById(config.acceptId);
+                var badge = document.getElementById(config.badgeId);
+                var accentColor = config.accentColor || '#6366f1';
+                var timer = null;
+                var topPred = null;
+
+                if (!titleEl || !descEl || !selectEl || !panel) return;
+
+                function buildBars(predictions) {
+                    var html = '';
+                    var top3 = predictions.slice(0, 3);
+                    for (var i = 0; i < top3.length; i++) {
+                        var p = top3[i];
+                        var icon = catIcons[p.category] || '📂';
+                        var color = barColors[i];
+                        var isTop = i === 0;
+                        html += '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:' + (i < top3.length - 1 ? '0.4rem' : '0') + ';">' +
+                            '<span style="font-size:0.8rem;min-width:20px;">' + icon + '</span>' +
+                            '<div style="flex:1;min-width:0;">' +
+                                '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">' +
+                                    '<span style="font-size:0.72rem;font-weight:' + (isTop ? '700' : '500') + ';color:' + (isTop ? '#1e1b4b' : '#6b7280') + ';">' + p.category + '</span>' +
+                                    '<span style="font-size:0.68rem;font-weight:700;color:' + color + ';">' + p.confidence + '%</span>' +
+                                '</div>' +
+                                '<div style="height:5px;background:#e8eaff;border-radius:50px;overflow:hidden;">' +
+                                    '<div style="height:100%;border-radius:50px;background:' + color + ';width:0%;transition:width 0.6s ease;" class="ai-bar-' + config.id + '" data-w="' + p.confidence + '"></div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>';
+                    }
+                    return html;
+                }
+
+                function predict() {
+                    var text = (titleEl.value + ' ' + descEl.value).trim();
+                    if (text.length < 8) {
+                        panel.style.display = 'none';
+                        return;
+                    }
+
+                    panel.style.display = 'block';
+                    if (badge) badge.style.display = 'inline';
+                    loadingEl.style.display = 'inline';
+
+                    clearTimeout(timer);
+                    timer = setTimeout(function() {
+                        fetch('/api/ml/predict', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ text: text })
+                        })
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            loadingEl.style.display = 'none';
+                            if (!data.predictions || data.predictions.length === 0) {
+                                resultsDiv.innerHTML = '<div style="font-size:0.75rem;color:#9ca3af;">Not enough data</div>';
+                                return;
+                            }
+                            topPred = data.predictions[0].category;
+                            resultsDiv.innerHTML = buildBars(data.predictions);
+
+                            // Animate bars
+                            setTimeout(function() {
+                                var bars = resultsDiv.querySelectorAll('.ai-bar-' + config.id);
+                                bars.forEach(function(b) { b.style.width = b.getAttribute('data-w') + '%'; });
+                            }, 50);
+
+                            // Show accept button
+                            if (data.predictions[0].confidence >= 30) {
+                                acceptBtn.style.display = 'inline-block';
+                                acceptBtn.textContent = '✓ Use "' + topPred + '"';
+                            } else {
+                                acceptBtn.style.display = 'none';
+                            }
+                        })
+                        .catch(function() {
+                            loadingEl.style.display = 'none';
+                            resultsDiv.innerHTML = '<div style="font-size:0.75rem;color:#9ca3af;">Prediction unavailable</div>';
+                        });
+                    }, 600);
+                }
+
+                // Listen on title and description
+                titleEl.addEventListener('input', predict);
+                descEl.addEventListener('input', predict);
+
+                // Accept button
+                acceptBtn.addEventListener('click', function() {
+                    if (topPred) {
+                        selectEl.value = topPred;
+                        selectEl.style.transition = 'box-shadow 0.3s ease';
+                        selectEl.style.boxShadow = '0 0 0 3px ' + accentColor + '40';
+                        setTimeout(function() { selectEl.style.boxShadow = 'none'; }, 1500);
+                        acceptBtn.textContent = '✓ Applied!';
+                        acceptBtn.style.background = 'linear-gradient(135deg,#059669,#10b981)';
+                        setTimeout(function() {
+                            acceptBtn.style.display = 'none';
+                            acceptBtn.style.background = config.btnGradient;
+                        }, 1500);
+                    }
+                });
+            }
+
+            // ── Predictor 1: LISTING category (from listing title + description) ──
+            createPredictor({
+                id: 'listing',
+                titleId: 'title',
+                descId: 'desc',
+                selectId: 'category',
+                panelId: 'ai-predict-panel',
+                resultsId: 'ai-predict-results',
+                loadingId: 'ai-predict-loading',
+                acceptId: 'ai-accept-btn',
+                badgeId: 'ai-cat-badge',
+                accentColor: '#6366f1',
+                btnGradient: 'linear-gradient(135deg,#6366f1,#8b5cf6)'
+            });
+
+            // ── Predictor 2: EXPERIENCE category (from experience title + description) ──
+            createPredictor({
+                id: 'experience',
+                titleId: 'expTitle',
+                descId: 'expDesc',
+                selectId: 'expCategory',
+                panelId: 'exp-ai-panel',
+                resultsId: 'exp-ai-results',
+                loadingId: 'exp-ai-loading',
+                acceptId: 'exp-ai-accept',
+                badgeId: 'exp-ai-badge',
+                accentColor: '#d97706',
+                btnGradient: 'linear-gradient(135deg,#d97706,#f59e0b)'
+            });
+        })();
         </script>
     </body>
 

@@ -357,6 +357,9 @@
                                 <div class="section-title">
                                     <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--brand);"></i>
                                     Similar Places You'll Love
+                                    <span style="margin-left:0.5rem; font-size:0.62rem; font-weight:600; padding:0.15rem 0.5rem; border-radius:50px; background:#eef2ff; color:#6366f1; vertical-align:middle;">
+                                        <i class="fa-solid fa-lightbulb" style="font-size:0.55rem;"></i> Explainable AI
+                                    </span>
                                 </div>
                                 <div id="rec-loading" style="display:flex; gap:1rem; overflow:hidden;">
                                     <div style="flex:1; min-width:200px; height:180px; border-radius:14px; background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:200% 100%; animation:recShimmer 1.5s ease-in-out infinite;"></div>
@@ -384,6 +387,67 @@
                                 .rec-card-price { font-weight:700; font-size:0.85rem; color:#374151; }
                                 .rec-card-price span { font-weight:400; color:#9ca3af; font-size:0.75rem; }
                                 .rec-card-score { font-size:0.65rem; font-weight:600; color:#059669; background:#ecfdf5; padding:0.1rem 0.45rem; border-radius:50px; }
+
+                                /* ── XAI Explainability Styles ── */
+                                .xai-toggle {
+                                    display:flex; align-items:center; gap:0.3rem;
+                                    font-size:0.68rem; font-weight:600; color:#6366f1;
+                                    cursor:pointer; background:#eef2ff; border:none;
+                                    border-radius:50px; padding:0.2rem 0.6rem;
+                                    transition:all 0.2s ease; margin-top:0.5rem; width:100%;
+                                    justify-content:center;
+                                }
+                                .xai-toggle:hover { background:#e0e7ff; }
+                                .xai-toggle i.chevron { transition:transform 0.2s ease; font-size:0.55rem; }
+                                .xai-toggle.expanded i.chevron { transform:rotate(180deg); }
+                                .xai-panel {
+                                    display:none; margin-top:0.6rem;
+                                    padding:0.7rem 0.6rem; background:#fafbff;
+                                    border-radius:10px; border:1px solid #eef2ff;
+                                }
+                                .xai-panel.show { display:block; }
+                                .xai-factor {
+                                    display:flex; align-items:center; gap:0.5rem;
+                                    margin-bottom:0.5rem; font-size:0.72rem;
+                                }
+                                .xai-factor:last-child { margin-bottom:0; }
+                                .xai-factor-icon {
+                                    width:22px; height:22px; border-radius:6px;
+                                    display:flex; align-items:center; justify-content:center;
+                                    font-size:0.6rem; color:white; flex-shrink:0;
+                                }
+                                .xai-factor-info { flex:1; min-width:0; }
+                                .xai-factor-header {
+                                    display:flex; justify-content:space-between;
+                                    align-items:center; margin-bottom:2px;
+                                }
+                                .xai-factor-name { font-weight:600; color:#374151; font-size:0.7rem; }
+                                .xai-factor-detail { font-size:0.62rem; color:#9ca3af; font-weight:500; }
+                                .xai-factor-bar-bg {
+                                    height:6px; background:#f0f0f0; border-radius:50px;
+                                    overflow:hidden;
+                                }
+                                .xai-factor-bar {
+                                    height:100%; border-radius:50px;
+                                    width:0%; transition:width 0.8s ease;
+                                }
+                                .xai-overall {
+                                    display:flex; align-items:center; gap:0.5rem;
+                                    margin-top:0.6rem; padding-top:0.5rem;
+                                    border-top:1px solid #e8eaff;
+                                }
+                                .xai-overall-score {
+                                    font-size:1.1rem; font-weight:800;
+                                    background:linear-gradient(135deg,#6366f1,#8b5cf6);
+                                    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+                                    background-clip:text;
+                                }
+                                .xai-overall-label {
+                                    font-size:0.68rem; color:#6b7280; font-weight:500;
+                                }
+                                @keyframes xaiBarIn {
+                                    from { width:0%; } to { width:var(--xai-w); }
+                                }
                             </style>
 
         </div><!-- end detail-wrapper -->
@@ -451,7 +515,7 @@
             })();
         </script>
 
-        <!-- ── Recommendations Script ── -->
+        <!-- ── Recommendations Script (with XAI Explanations) ── -->
         <script>
             (function() {
                 var listingId = '<%= details.id %>';
@@ -474,24 +538,70 @@
                         // Has results — show the section
                         section.style.display = 'block';
 
-                        data.recommendations.forEach(function(rec) {
+                        data.recommendations.forEach(function(rec, idx) {
                             var imgUrl = rec.image && rec.image.url ? rec.image.url : '';
                             if (imgUrl && imgUrl.includes('res.cloudinary.com') && imgUrl.includes('/upload/')) {
                                 imgUrl = imgUrl.replace('/upload/', '/upload/w_500,h_320,c_fill,g_auto,q_auto:best,f_auto/');
                             }
                             var price = Number(rec.price).toLocaleString('en-IN');
-                            var card = document.createElement('a');
-                            card.href = '/moreabout/' + rec._id + '?from=stays';
-                            card.className = 'rec-card';
-                            card.innerHTML = '<img src="' + imgUrl + '" alt="' + rec.title + '">' +
-                                '<div class="rec-card-body">' +
-                                    '<div class="rec-card-title">' + rec.title + '</div>' +
-                                    '<div class="rec-card-loc"><i class="fa-solid fa-location-dot me-1" style="color:#fe424d;font-size:0.65rem;"></i>' + rec.location + ', ' + rec.country + '</div>' +
-                                    '<div class="rec-card-bottom">' +
-                                        '<div class="rec-card-price">&#8377; ' + price + ' <span>/night</span></div>' +
-                                        '<span class="rec-card-score">' + rec.similarityScore + '% match</span>' +
+                            var xaiId = 'xai-' + idx + '-' + Date.now();
+
+                            // Build XAI factors HTML
+                            var xaiHtml = '';
+                            if (rec.explanation && rec.explanation.factors) {
+                                var factorsHtml = rec.explanation.factors.map(function(f, fi) {
+                                    return '<div class="xai-factor">' +
+                                        '<div class="xai-factor-icon" style="background:' + f.color + ';">' +
+                                            '<i class="fa-solid ' + f.icon + '"></i>' +
+                                        '</div>' +
+                                        '<div class="xai-factor-info">' +
+                                            '<div class="xai-factor-header">' +
+                                                '<span class="xai-factor-name">' + f.name + ' (' + Math.round(f.weight * 100) + '%)</span>' +
+                                                '<span class="xai-factor-detail">' + f.detail + '</span>' +
+                                            '</div>' +
+                                            '<div class="xai-factor-bar-bg">' +
+                                                '<div class="xai-factor-bar" data-xai-width="' + f.score + '" style="background:' + f.color + ';" id="xbar-' + xaiId + '-' + fi + '"></div>' +
+                                            '</div>' +
+                                        '</div>' +
+                                        '<span style="font-size:0.68rem;font-weight:700;color:' + f.color + ';min-width:28px;text-align:right;">' + f.score + '</span>' +
+                                    '</div>';
+                                }).join('');
+
+                                var overallLabel = rec.explanation.overallScore >= 80 ? 'Excellent match' :
+                                                   rec.explanation.overallScore >= 60 ? 'Good match' : 'Partial match';
+
+                                xaiHtml =
+                                    '<button class="xai-toggle" onclick="(function(b){var p=b.nextElementSibling;p.classList.toggle(\'show\');b.classList.toggle(\'expanded\');if(p.classList.contains(\'show\')){p.querySelectorAll(\'.xai-factor-bar\').forEach(function(bar){setTimeout(function(){bar.style.width=bar.getAttribute(\'data-xai-width\')+\'%\';},100)})}})(this)">' +
+                                        '<i class="fa-solid fa-lightbulb" style="color:#f59e0b;"></i> Why recommended?' +
+                                        ' <i class="fa-solid fa-chevron-down chevron"></i>' +
+                                    '</button>' +
+                                    '<div class="xai-panel" id="' + xaiId + '">' +
+                                        factorsHtml +
+                                        '<div class="xai-overall">' +
+                                            '<span class="xai-overall-score">' + rec.explanation.overallScore + '%</span>' +
+                                            '<span class="xai-overall-label">' + overallLabel + ' · Weighted Score</span>' +
+                                        '</div>' +
+                                    '</div>';
+                            }
+
+                            var card = document.createElement('div');
+                            card.style.cssText = 'border-radius:14px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.07); background:white; border:1px solid #f0f0f0; transition:all 0.3s ease;';
+                            card.innerHTML =
+                                '<a href="/moreabout/' + rec._id + '?from=stays" style="text-decoration:none;color:inherit;display:block;">' +
+                                    '<img src="' + imgUrl + '" alt="' + rec.title + '" style="width:100%;aspect-ratio:16/10;object-fit:cover;display:block;">' +
+                                    '<div class="rec-card-body">' +
+                                        '<div class="rec-card-title">' + rec.title + '</div>' +
+                                        '<div class="rec-card-loc"><i class="fa-solid fa-location-dot me-1" style="color:#fe424d;font-size:0.65rem;"></i>' + rec.location + ', ' + rec.country + '</div>' +
+                                        '<div class="rec-card-bottom">' +
+                                            '<div class="rec-card-price">&#8377; ' + price + ' <span>/night</span></div>' +
+                                            '<span class="rec-card-score">' + rec.similarityScore + '% match</span>' +
+                                        '</div>' +
                                     '</div>' +
-                                '</div>';
+                                '</a>' +
+                                (xaiHtml ? '<div style="padding:0 0.85rem 0.85rem;">' + xaiHtml + '</div>' : '');
+
+                            card.addEventListener('mouseenter', function() { card.style.transform = 'translateY(-4px)'; card.style.boxShadow = '0 8px 28px rgba(0,0,0,0.12)'; });
+                            card.addEventListener('mouseleave', function() { card.style.transform = 'none'; card.style.boxShadow = '0 2px 12px rgba(0,0,0,0.07)'; });
                             grid.appendChild(card);
                         });
                     })

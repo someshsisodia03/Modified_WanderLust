@@ -41,8 +41,10 @@ async(req, res) => {
 
 module.exports.logout=(req,res)=>{
     req.logout(()=>{
-    req.flash("success","You have been successfully logged-out");
-    res.locals.redirect=false;
-    res.redirect("/");
+        // Destroy the session completely so back-button can't restore it
+        req.session.destroy((err) => {
+            res.clearCookie('connect.sid'); // Clear session cookie
+            res.redirect("/listing/login");
+        });
     })
 }

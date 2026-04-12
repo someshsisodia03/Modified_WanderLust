@@ -334,6 +334,7 @@ async function get_listing_details(args) {
             : 'N/A';
 
         return {
+            id: item._id,
             type: 'stay',
             title: item.title,
             location: `${item.location}, ${item.country}`,
@@ -355,6 +356,7 @@ async function get_listing_details(args) {
     if (exp) {
         const reviewCount = exp.reviews ? exp.reviews.length : 0;
         return {
+            id: exp._id,
             type: 'experience',
             title: exp.title,
             location: exp.destination ? `${exp.destination.name}, ${exp.destination.country}` : 'Unknown',

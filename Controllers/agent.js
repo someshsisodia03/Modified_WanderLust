@@ -156,13 +156,18 @@ async function runAgentWithModel(modelName, userQuery, history) {
     });
 
     // Build conversation history for multi-turn context
-    const chatHistory = [];
+    // Gemini API requires: (1) first message must be role 'user', (2) roles must alternate
+    let chatHistory = [];
     if (history && history.length > 0) {
         for (const h of history) {
             chatHistory.push({
                 role: h.role === 'user' ? 'user' : 'model',
                 parts: [{ text: h.text }]
             });
+        }
+        // Trim leading 'model' messages — Gemini requires first message to be 'user'
+        while (chatHistory.length > 0 && chatHistory[0].role !== 'user') {
+            chatHistory.shift();
         }
     }
 
@@ -213,6 +218,7 @@ async function runAgentWithModel(modelName, userQuery, history) {
                 tool: name,
                 args: args || {},
                 result: summarizeToolResult(name, result),
+                fullResult: result,  // preserve full result for card building
                 duration: duration,
                 iteration: iterations,
             });
@@ -309,23 +315,90 @@ function summarizeToolResult(toolName, result) {
 
 /**
  * Build visual recommendation cards from the tool trace.
- * Extracts stay/experience data from tool results for the card UI.
+ * Extracts stay/experience data from the stored full results for the card UI.
  */
 function buildCardsFromTrace(toolTrace) {
     const cards = [];
     const seenIds = new Set();
 
     for (const step of toolTrace) {
-        if (step.tool === 'search_stays' && !step.result?.error) {
-            // Re-fetch the full result is not practical here, but we stored summaries
-            // Cards are supplementary — the main data is in the text response
+        const full = step.fullResult;
+        if (!full || full.error) continue;
+
+        // Extract stay cards from search_stays or plan_itinerary results
+        if (step.tool === 'search_stays' || step.tool === 'plan_itinerary') {
+            const stays = full.stays || full.available_stays || [];
+            for (const s of stays.slice(0, 3)) {
+                const id = String(s.id || s._id || '');
+                if (!id || seenIds.has(id)) continue;
+                seenIds.add(id);
+                cards.push({
+                    type: 'stay',
+                    id: id,
+                    title: s.title,
+                    location: s.location || '',
+                    price: s.price_num || 0,
+                    priceLabel: s.price || `₹${s.price_num || 0}/night`,
+                    category: s.category || 'Stay',
+                });
+            }
         }
-        if (step.tool === 'search_experiences' && !step.result?.error) {
-            // Same as above
+
+        // Extract experience cards from search_experiences or plan_itinerary results
+        if (step.tool === 'search_experiences' || step.tool === 'plan_itinerary') {
+            const exps = full.experiences || full.available_experiences || [];
+            for (const e of exps.slice(0, 3)) {
+                const id = String(e.id || e._id || '');
+                if (!id || seenIds.has(id)) continue;
+                seenIds.add(id);
+                cards.push({
+                    type: 'experience',
+                    id: id,
+                    title: e.title,
+                    location: e.location || '',
+                    price: e.price_num || 0,
+                    priceLabel: e.price || `₹${e.price_num || 0}`,
+                    category: e.category || 'Experience',
+                    duration: e.duration || '',
+                });
+            }
+        }
+
+        // Extract card from get_listing_details
+        if (step.tool === 'get_listing_details' && full.title) {
+            const id = String(full.id || full._id || '');
+            if (id && !seenIds.has(id)) {
+                seenIds.add(id);
+                cards.push({
+                    type: full.type === 'experience' ? 'experience' : 'stay',
+                    id: id,
+                    title: full.title,
+                    location: full.location || '',
+                    price: 0,
+                    priceLabel: full.price || '',
+                    category: full.category || '',
+                });
+            }
+        }
+
+        // Extract cards from find_similar
+        if (step.tool === 'find_similar' && full.similar_items) {
+            for (const s of full.similar_items.slice(0, 3)) {
+                cards.push({
+                    type: 'stay',
+                    id: '',
+                    title: s.title,
+                    location: s.location || '',
+                    price: 0,
+                    priceLabel: s.price || '',
+                    category: s.category || '',
+                });
+            }
         }
     }
 
-    return cards; // Cards will come from the fullResult stored during execution
+    // Cap at 5 cards total
+    return cards.slice(0, 5);
 }
 
 
@@ -392,11 +465,16 @@ module.exports.chat = async (req, res) => {
             });
         }
 
-        // ── Phase 3: Return response with tool trace ──
+        // ── Phase 3: Build cards from tool results + return response ──
+        const cards = buildCardsFromTrace(result.toolTrace || []);
+
+        // Strip fullResult from trace before sending to frontend (too large)
+        const cleanTrace = (result.toolTrace || []).map(({ fullResult, ...rest }) => rest);
+
         res.json({
             reply: result.reply,
-            toolTrace: result.toolTrace || [],
-            cards: [] // Cards are optional — the text has all the info
+            toolTrace: cleanTrace,
+            cards: cards
         });
 
     } catch (err) {

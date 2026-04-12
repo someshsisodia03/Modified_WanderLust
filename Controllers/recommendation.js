@@ -1,18 +1,23 @@
 /**
- * Recommendation Controller
+ * Recommendation Controller — with Explainable AI (XAI)
  * 
- * Handles finding similar items using cosine similarity on embeddings.
+ * Handles finding similar items using cosine similarity on embeddings,
+ * PLUS decomposes each recommendation into explainable factors.
+ * 
  * Endpoint: GET /api/recommendations/:type/:id
  * 
  * :type = 'listing' | 'experience' | 'destination'
  * :id   = MongoDB ObjectId of the item
  * 
- * Returns top 4 most similar items with similarity scores.
+ * Returns top 4 most similar items with:
+ *   - similarityScore: the raw cosine similarity (0-100%)
+ *   - explanation: { overallScore, factors[] } — WHY it was recommended
+ *     Each factor: { name, score, weight, contribution, icon, color, detail }
  */
 const lstData = require('../Models/lstingModel');
 const Experience = require('../Models/experienceModel');
 const Destination = require('../Models/destinationModel');
-const { findSimilar } = require('../utils/similarity');
+const { findSimilar, explainSimilarity } = require('../utils/similarity');
 
 // Map type names to their models
 const modelMap = {
@@ -40,12 +45,12 @@ module.exports.getRecommendations = async (req, res) => {
             return res.json({ recommendations: [], message: 'No embedding available for this item' });
         }
 
-        // Fetch ALL items of the same type with their embeddings
+        // Fetch ALL items of the same type with their embeddings + reviews (for XAI)
         let allItems;
         if (type === 'listing') {
-            allItems = await Model.find({}).select('+embedding').lean();
+            allItems = await Model.find({}).select('+embedding').populate('reviews').lean();
         } else if (type === 'experience') {
-            allItems = await Model.find({}).select('+embedding').populate('destination').lean();
+            allItems = await Model.find({}).select('+embedding').populate('destination').populate('reviews').lean();
         } else {
             allItems = await Model.find({}).select('+embedding').lean();
         }
@@ -56,15 +61,20 @@ module.exports.getRecommendations = async (req, res) => {
         // Only show recommendations above 75% similarity threshold
         const MIN_SIMILARITY = 0.75;
 
-        // Format the response based on type
+        // Format the response with XAI explanations
         const recommendations = similar
             .filter(({ score }) => score >= MIN_SIMILARITY)
             .map(({ item, score }) => {
                 // Remove the embedding from the response (it's huge)
-                const { embedding, ...rest } = item;
+                const { embedding, reviews, ...rest } = item;
+
+                // ── XAI: Decompose WHY this item was recommended ──
+                const explanation = explainSimilarity(target, item, score);
+
                 return {
                     ...rest,
-                    similarityScore: Math.round(score * 100) // Convert to 0-100%
+                    similarityScore: Math.round(score * 100), // Raw cosine similarity 0-100%
+                    explanation  // { overallScore, factors[] }
                 };
             });
 

@@ -3,6 +3,7 @@ let review = require("../Models/reviewModel.js");
 const Experience = require("../Models/experienceModel.js");
 const Destination = require("../Models/destinationModel.js");
 const { getEmbedding, buildListingText } = require('../utils/embeddings');
+const { incrementalLearn } = require('./ml');
 
 const LISTING_PER_PAGE = 12;
 module.exports.showlisting = async (req, res) => {
@@ -91,6 +92,12 @@ module.exports.edit = async (req, res) => {
     });
     newplace.owner = req.user._id;
     await newplace.save();
+
+    // ── Online Learning: Feed this listing to Naive Bayes (RLHF) ──
+    // The model learns from the user's category choice immediately
+    try {
+        incrementalLearn(title, description, category);
+    } catch (e) { console.log('[ML] Incremental learn error:', e.message); }
 
     // Auto-generate embedding for recommendation engine (non-blocking)
     getEmbedding(buildListingText(newplace)).then(emb => {
